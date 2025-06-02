@@ -51,22 +51,9 @@
   </style>
 
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
   <!-- Turn.js -->
-  <script src="https://www.turnjs.com/lib/turn.min.js"></script>
-
-  <script>
-    $(document).ready(function () {
-      const flipbookWidth = window.innerWidth * 0.9;
-      const flipbookHeight = window.innerHeight * 0.6;
-
-      $('#flipbook').turn({
-        width: flipbookWidth,
-        height: flipbookHeight,
-        autoCenter: false // we center with CSS wrapper
-      });
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/gh/blasten/turn.js@4/turn.min.js"></script>
 
 </head>
 
@@ -282,36 +269,46 @@ This is not a goodbye message, but just a journal i selectively shared among you
   "></div>
 </div>
   <script>
-  function log(msg) {
-  document.getElementById("debug-log").innerHTML += msg + "<br>";
-}
+  // Save original console methods
+  const originalConsoleLog = console.log;
+  const originalConsoleWarn = console.warn;
+  const originalConsoleError = console.error;
 
-$(document).ready(function () {
-  log("Initializing flipbook...");
-  log("Pages: " + $('#flipbook .page').length);
+  // Unified logging function
+  function appendToDebugLog(type, ...args) {
+    const debugLog = document.getElementById("debug-log");
+    if (debugLog) {
+      const timestamp = new Date().toLocaleTimeString();
+      const color = type === 'log' ? 'lime' : type === 'warn' ? 'orange' : 'red';
+      const prefix = type.toUpperCase();
+      const msg = args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+      ).join(' ');
+      debugLog.innerHTML += `<div style="color:${color};">[${timestamp}] ${prefix}: ${msg}</div>`;
+    }
+  }
 
-  $('#flipbook').turn({
-    width: window.innerWidth * 0.9,
-    height: window.innerHeight * 0.6,
-    autoCenter: true
-  });
+  // Override console methods
+  console.log = function (...args) {
+    originalConsoleLog.apply(console, args);
+    appendToDebugLog('log', ...args);
+  };
 
-  log("Flipbook initialized.");
-});
+  console.warn = function (...args) {
+    originalConsoleWarn.apply(console, args);
+    appendToDebugLog('warn', ...args);
+  };
+
+  console.error = function (...args) {
+    originalConsoleError.apply(console, args);
+    appendToDebugLog('error', ...args);
+  };
 </script>
 
 <script>
   function toggleDebugLog() {
     const logEl = document.getElementById("debug-log");
     logEl.style.display = (logEl.style.display === "none") ? "block" : "none";
-  }
-
-  function log(msg) {
-    const debugLog = document.getElementById("debug-log");
-    if (debugLog) {
-      debugLog.innerHTML += msg + "<br>";
-    }
-    console.log(msg); // always log to browser console too
   }
 
   $(document).ready(function () {
@@ -335,6 +332,5 @@ $(document).ready(function () {
     }
   });
 </script>
-
 </body>
 </html>
