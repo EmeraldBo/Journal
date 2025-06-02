@@ -1,0 +1,27 @@
+<!-- Save this as quiz.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Quiz</title>
+  <script>
+    function checkAnswer() {
+      const correctAnswers = ["qief", "danielle", "umairah", "sacha"];
+      const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+
+      if (correctAnswers.includes(userAnswer)) {
+        // Redirect to success page
+        window.location.href = "journal.html";
+      } else {
+        // Redirect to exit/failure page
+        window.location.href = "exit.html";
+      }
+    }
+  </script>
+</head>
+<body>
+  <h2>Answer the following:</h2>
+  <p>What is your name?</p>
+  <input type="text" id="answer" placeholder="Your actual name here" />
+  <button onclick="checkAnswer()">Submit</button>
+</body>
+</html>
