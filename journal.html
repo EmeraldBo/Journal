@@ -67,6 +67,7 @@
       });
     });
   </script>
+
 </head>
 
 <body>
@@ -226,7 +227,7 @@ To Danielle, my loving friend. We've known each other since elementary, even tho
 </div>
 <div class="page">
 <pre>
-I may not be able to tell this to you directly, but yes, i still do like you despite already having a girlfriend. Earlier, when we were texting, i was crying desperately inside myself even though no tears flowed out of my eyes. I wanted a hug, a kiss, something to let me know that my one year of liking you was not a waste. However, knowing that i had attempted to assault you, i know it wont happen, and my efforts of building trust would just go to waste anyway. So, you dont have to respond.
+I may not be able to tell this to you directly, but yes, i still do like you despite already having a girlfriend. Earlier, when we were texting, i was crying desperately inside myself even though no tears flowed out of my eyes. I wanted a hug, a kiss, something to let me know that my one year of liking you was not a waste. However, knowing that i had attempted to assault you, i know it wont happen, and my efforts of building trust would just go to waste anyway. So, you dont hav to respond.
 </pre>
 </div>
 <div class="page">
@@ -257,5 +258,83 @@ This is not a goodbye message, but just a journal i selectively shared among you
 </pre>
 </div>
   </div>
+<!-- Collapsible Debug Log -->
+<div id="debug-log-wrapper" style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  font-family: monospace;
+  font-size: 12px;
+">
+  <div style="background: #222; color: #0f0; padding: 5px 10px; cursor: pointer;" onclick="toggleDebugLog()">
+    ⚙️ Debug Log (click to toggle)
+  </div>
+  <div id="debug-log" style="
+    background: black;
+    color: lime;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 10px;
+    display: none;
+    border-bottom: 2px solid lime;
+  "></div>
+</div>
+  <script>
+  function log(msg) {
+  document.getElementById("debug-log").innerHTML += msg + "<br>";
+}
+
+$(document).ready(function () {
+  log("Initializing flipbook...");
+  log("Pages: " + $('#flipbook .page').length);
+
+  $('#flipbook').turn({
+    width: window.innerWidth * 0.9,
+    height: window.innerHeight * 0.6,
+    autoCenter: true
+  });
+
+  log("Flipbook initialized.");
+});
+</script>
+
+<script>
+  function toggleDebugLog() {
+    const logEl = document.getElementById("debug-log");
+    logEl.style.display = (logEl.style.display === "none") ? "block" : "none";
+  }
+
+  function log(msg) {
+    const debugLog = document.getElementById("debug-log");
+    if (debugLog) {
+      debugLog.innerHTML += msg + "<br>";
+    }
+    console.log(msg); // always log to browser console too
+  }
+
+  $(document).ready(function () {
+    log("Initializing flipbook...");
+    const pageCount = $('#flipbook .page').length;
+    log("Pages: " + pageCount);
+
+    if (pageCount < 2) {
+      log("⚠️ At least 2 pages are needed for flipping to work.");
+    }
+
+    if ($('#flipbook').turn) {
+      $('#flipbook').turn({
+        width: window.innerWidth * 0.9,
+        height: window.innerHeight * 0.6,
+        autoCenter: true
+      });
+      log("✅ Flipbook initialized.");
+    } else {
+      log("❌ Turn.js is not available or not loaded.");
+    }
+  });
+</script>
+
 </body>
 </html>
