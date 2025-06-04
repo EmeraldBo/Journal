@@ -177,8 +177,8 @@ function loadComments(pageNumber) {
         console.warn('⚠️ At least 2 pages are needed for flipping to work.');
       }
       $('#flipbook').turn({
-        width:      400,
-        height:     600,
+        width:      isPC ? 400  : window.innerWidth * 0.9,
+        height:     isPC ? 600  : window.innerHeight * 0.8,
         autoCenter: true,
         display:    'single',
         elevation:  50,
