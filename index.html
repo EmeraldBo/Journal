@@ -14,40 +14,34 @@
       }
   </style>
   
-  <script>
-    function checkAnswer() {
-      const registeredAccounts = [["qief", 'password'], ["danielle", '072319'], ["umairah", 'SomethingAboutStrawberry']];
-      const debugAcc = [['debug', 'DEBUG-LOVELESSDIARY']]
-      const userName = document.getElementById('username').value.trim().toLowerCase();
-      const userPass = document.getElementById('password').value.trim();
-      
-      let matchFound = false
+<script>
+  function checkAnswer() {
+    const registeredAccounts = [["qief", 'password'], ["danielle", '072319'], ["umairah", 'SomethingAboutStrawberry']];
+    const debugAcc = [['debug', 'DEBUG-LOVELESSDIARY']];
+    const userName = document.getElementById('username').value.trim().toLowerCase();
+    const userPass = document.getElementById('password').value.trim();
 
-      for (let i = 0; i < registeredAccounts.length; i++) {
-        const account = registeredAccounts[i]
-        if (account[0] == userName && account[1] == userPass) {
-          matchFound = true;
-          break;
-        }
-      }
-      if (matchFound) {
-        // Redirect to success page
-        window.location.href = "journal.html";
-      } else if (debugAcc[0][0] == userName && debugAcc[0][1] == userPass) {
-        // Redirect to success page
-        window.location.href = "journal-testing.html";
-      } else {
-        // Redirect to exit/failure page
-        window.location.href = "login-fail.html";
-      }
+    let matchFound = false;
 
-      const username = document.getElementById('username').value.trim();
-    if (username) {
-      localStorage.setItem('journalUsername', username);
-      window.location.href = 'journal-testing.html';
+    for (let i = 0; i < registeredAccounts.length; i++) {
+      const account = registeredAccounts[i];
+      if (account[0] === userName && account[1] === userPass) {
+        matchFound = true;
+        break;
+      }
     }
+
+    if (matchFound) {
+      localStorage.setItem('journalUsername', userName);
+      window.location.href = "journal.html";
+    } else if (debugAcc[0][0] === userName && debugAcc[0][1] === userPass) {
+      localStorage.setItem('journalUsername', userName);
+      window.location.href = "journal-testing.html";
+    } else {
+      window.location.href = "login-fail.html";
     }
-  </script>
+  }
+</script>
 </head>
 <body>
   <h2>Login to ???</h2>
