@@ -2,7 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>My Journal Flipbook</title>
+  <title>Timeless Journal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     html, body {
       margin: 0;
@@ -32,7 +34,7 @@
     }
 
     /* Each page is half the book width */
-    #flipbook .page{
+    #flipbook .page {
       width: 45vw;
       height: 60vh;
       background: white;
@@ -43,6 +45,7 @@
       font-size: clamp(14px, 2vw, 18px);
       line-height: 1.4;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      position: relative; /* ensure we can absolutely position page numbers inside */
     }
     #flipbook .page pre {
       white-space: pre-wrap;
@@ -50,372 +53,366 @@
       word-break: break-word;
     }
     #flipbook .page img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin-top: 1rem;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 1rem;
+    }
+
+    #centerText {
+      position: fixed;
+      top: 10vh;
+      left: 50vw;
+      transform: translate(-50%, -50%);
+      font-size: clamp(12px, 4vw, 24px);
+      font-family: sans-serif;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 10000;
+    }
+
+    /* Optional style tweak for page‐number div */
+    .page-number {
+      font-weight: bold;
+      opacity: 0.6;
     }
   </style>
 
-<!-- 1) jQuery 1.9.1 (must load first) -->
-<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <!-- 1) jQuery 1.9.1 (must load first) -->
+  <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <!-- 2) Turn.js 3 (must load second) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
 
-<!-- 2) Turn.js 3 (must load second) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+  <script>
+    // Left/Right arrow navigation
+    $(document).keydown(function(e) {
+      switch (e.key) {
+        case 'ArrowLeft':
+          $('#flipbook').turn('previous');
+          break;
+        case 'ArrowRight':
+          $('#flipbook').turn('next');
+          break;
+      }
+    });
+  </script>
 </head>
 
 <body>
+  <!-- Center‐screen hint -->
+  <script>
+    $(document).ready(function () {
+      const isPC = window.innerWidth >= 768;
+      const centerText = document.createElement('div');
+      centerText.id = 'centerText';
+      centerText.textContent = 'Use Arrow Keys (PC) or Swipe/Tap (Mobile) to navigate.';
+      document.body.appendChild(centerText);
+    });
+  </script>
+
   <div id="flipbook-wrapper">
     <div id="flipbook">
-        <div class="page">
-            <pre>
+      <!-- Page 1 (static) -->
+      <div class="page">
+        <pre>
 Timeless Journal
-                
-    by ???
-            </pre>
-            <img src="doodles/doodle-title-2.jpg" alt="doodle_title" style="max-width: 100%; height: auto">
-            
-        </div>
-      <div class="page">
-<pre>
-    1
-    
-20XX
-
-I... I kissed Danielle... God it felt so good, but... I have a feeling that she won't like any of that at all...
-
-I hope she'd forgive me for that... I lost my control over my body just seeing her vulnerable, defenseless state... God I regret this now...
-</pre>
+        
+by ???
+        </pre>
+        <img src="doodles/doodle-title-2.jpg"
+             alt="Timeless Journal title doodle">
       </div>
-      <div class="page">
-      <pre>
-    2
-          
-      2024
 
-This was the year when I met the wonderful Clara. Or otherwise known as Hiromi, Ketsueki, or Alexa. She's such a wonderful person yet i cant help but want her to stop her coffee addiction and get some rest. This was also the time that The Universal Shenanigans was born, meant to be a private group chat between us AUT (A Universal Time) players.
-</pre>
-</div>
-      <div class="page">
-      <pre>
-    3
-          
-During my summer vacation, I went ahead and revisited my old passion from 10 year old me, Sticknodes animating. I was practically shit, honestly. However, I managed to make an animation good enough for my youtube channel.
-</pre>
-</div>
+      <!-- Page 2 (dynamic) -->
+      <div class="page" data-src="Pages/20XX/page1.html"></div>
 
-      <div class="page">
-<pre>
-    4
-    
-Wow, I... dont really believe it but I reached 100 subscribers in no time. Quite unexpected too was that my 7 second kabedon.mp4 video reached 2k views. Somehow... i became a youtuber.
+      <!-- 2024 -->
+      <div class="page" data-src="Pages/2024/page1.html"></div>
+      <div class="page" data-src="Pages/2024/page2.html"></div>
+      <div class="page" data-src="Pages/2024/page3.html"></div>
 
-I dont really know what happened but Alexa just suddenly disappeared. I dont know where she went or why she disappeared. I just hope she comes back with some answers.
-</pre>			
-</div>
-	<div class="page">
-<pre>
-    5
-    
-January 2025
+      <!-- January 2025 -->
+      <div class="page" data-src="Pages/2025/January/page1.html"></div>
+      <div class="page" data-src="Pages/2025/January/page2.html"></div>
+      <div class="page" data-src="Pages/2025/January/page3.html"></div>
 
-It's my birthday, and i do not feel good at all. I feel like complete shit, just thinking about Alexa and where she may be. Why did she just leave me like that?
-</pre>
-</div>
-<div class="page">
-<pre>
-    6
-    
-Just finished school, yelling and shit like back then. Though what really pissed me off was Satyen, yelling back at me. I dont know what ticked me off after that, maybe it was the noise? The more embarrassing part was the fact I limped over with my aunt towards the car going home. Like, god just fucking kill me already.
-</pre>
-</div>
-<div class="page">
-<pre>
-    7
-    
-Wow, two weeks and i've managed to get mad once again. To be honest, i dont remember what happened but all i remember is choking  Satyen, him going to Shawn, and hearing about how Shawn's gonna beat me up if i ever do choke him again. Fucking kill me already.
+      <!-- February 2025 -->
+      <div class="page" data-src="Pages/2025/February/page1.html"></div>
 
-edit: we forgave eachother (yippee i guess)
-</pre>
-</div>
-<div class="page">
-<pre>
-    8
-    
-February 2025
+      <!-- March 2025 -->
+      <div class="page" data-src="Pages/2025/March/page1.html"></div>
+      <div class="page" data-src="Pages/2025/March/page2.html"></div>
 
-Valentines? ...maybe i have someone in mind. I dont know why but I have a feeling that I have fallen in love with Danielle. I know Im speaking to myself, and that's good because i dont want anyone to know... unless im an obvious person.
-</pre>
-</div>		
-<div class="page">
-<pre>
-    9
-    
-March 2025
+      <!-- April 2025 -->
+      <div class="page" data-src="Pages/2025/April/page1.html"></div>
+      <div class="page" data-src="Pages/2025/April/page2.html"></div>
 
-So, there's this random person i met in Write a Letter named Pixel, and with her her friend named Chamble. They're pretty nice not gonna lie, they friendly.
+      <!-- May 2025 -->
+      <div class="page" data-src="Pages/2025/May/page1.html"></div>
+      <div class="page" data-src="Pages/2025/May/page2.html"></div>
+      <div class="page" data-src="Pages/2025/May/page3.html"></div>
+      <div class="page" data-src="Pages/2025/May/page4.html"></div>
 
-Just came into my long abandoned discord server, abandoned due to the disappearance of Alexa but i guess a bit alive now. Man, I wonder what's gonna happen next.
-</pre>
-</div>
-<div class="page">
-<pre>
-    10
-    
-Im starting to like two people now. Danielle and Pixel. GOD WHAT IS GOING ON??? Like, man i dont know what to do...
-</pre>
-</div>
-<div class="page">
-<pre>
-    11
-    
-April 2025
+      <!-- June 2025 -->
+      <div class="page" data-src="Pages/2025/June/page1.html"></div>
 
-Welp, news breaker, she confessed to me. Honestly, i didn't like her that much since i was single for the past 3 years, having no hope on having a girlfriend. However, i thought about it.
+      <div class="page" data-src="Pages/Other/blank.html"></div>
+      <div class="page" data-src="Pages/Other/blank.html"></div>
+      <div class="page" data-src="Pages/Other/lettertitle.html"></div>
 
-"What if i like her later?"
 
-And so, I "confessed" to her back for this reason, and the fact that i just wanted a girlfriend to be with me.
-</pre>
-</div>
-<div class="page">
-<pre>
-    12
-    
-Man. She said we were gonna meet in 5 years. That long??? *SIGHHHHHH* i have to be patient about this, maybe i could be rewarded with a kiss or maybe... yeah, i cant write that here.
+      <!-- Letter (SpecialMessage) -->
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page1.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page2.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page3.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page4.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page5.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page6.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page7.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page8.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page9.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page10.html"></div>
+    </div> <!-- /#flipbook -->
+  </div> <!-- /#flipbook-wrapper -->
 
-I have something to confess to myself. I think I like Danielle more than Umirah (yes, she revealed her name to me.) Though, i dont really want to break my girlfriend's heart so I'll just have to keep this in here and in my head.
-</pre>
-</div>
-<div class="page">
-<pre>
-    13
-    
-May 2025
-
-Practices started and im starting to not go to school. Mostly because im just lazy, but also because im tired, exhausted, SPENT. Like, im already a batch behind in my requirements, what's the point?
-
-IM AT FUCKING PANGASINAN RIGHT NOW, STOP MAKING ME FUCKING THINK ABOUT THE PRACTICE AND LET ME CLEAR MY GODDAMN HEAD! What's this, you're mad too? HAH, Try and match my rage. I'll bash your head against a rock.
-</pre>
-</div>
-<div class="page">
-<pre>
-    14
-    
-*sigh* after basically coinflipping my going to school, i finally arrived for practices. Honestly, i knew the first steps, but they advanced so much without me i dont think i can keep up. Im still hung about what happened while i was in Pangasinan, will they forgive me for what i said? I dont know, either way i'll just practice for a little then leave right afterwards. I dont want to be a part of this mess anymore.
-</pre>
-</div>
-<div class="page">
-<pre>
-    15
-    
-Woah, what is this? For the first time in a while, Danielle's initiating the hugs, letting me hold her hand, and supporting me? God is this a fever dream or something? Idk anymore man, i guess ill just enjoy this warmth for a lil bit.
-</pre>
-</div>
-<div class="page">
-<pre>
-    16
-    
-Im starting to attend the practices more just for Danielle. Expecting her greetings, her warm hugs... god dont wake me up from this dream.
-
-Whooh, School's over and im now able to do my own stuff! I can draw and animate my new content, program some new applications, make some music, WOOOOOOO-
-
-Welp, this certainly got boring. I cant finish any of my personal projects, and i just want to go sleep and shit.
-</pre>
-</div>
-<div class="page">
-    17
-</div>
-<div class="page">
-<pre>
-    18
-    
-Present. (June 2, 2025)
-
-If you are reading this, congratulations. You've solved a puzzle that i have programmed overnight. If you are wondering about my current state..
-
-Im going insane. I dont know what to do. I want to hurt myself, feel pain, but at the same time i dont. I've been going to therapy for the past several months, but i dont feel the benefits of it.
-</pre>
-</div>
-<div class="page">
-    19
-</div>
-<div class="page">
-<pre>
-    20
-    
-To Umairah, my dear girlfriend. You've been a great, understanding person for me for these two months we've been together. You've made me laugh, made me smile, and vice versa. I apologize deeply for being pushy over what i want, im just very impatient, wanting to just have you in my arms this instant. I want to feel you, physically. Though i said i didnt like you very much, and yes, i am sorry for that, i still care for you and still see you as my girlfriend.
-</pre>
-</div>
-<div class="page">
-<pre>
-    21
-    
-Not because i want to, but because i've grown close to you this few months. I love you.
-</pre>
-</div>
-<div class="page">
-<pre>
-    22
-    
-To Danielle, my loving friend. We've known each other since elementary, even though my only memory of you is just you hugging me and us jumping after i said that "i'll still stay in this school." You've supported me throughout my life up until now, just being by my side and staying in contact with me like how i did the same for when you cried. The life i have now wouldn't be the same if you were not there. 
-</pre>
-</div>
-<div class="page">
-<pre>
-    23
-    
-I may not be able to tell this to you directly, but yes, i still do like you despite already having a girlfriend. Earlier, when we were texting, i was crying desperately inside myself even though no tears flowed out of my eyes. I wanted a hug, a kiss, something to let me know that my one year of liking you was not a waste. However, knowing that i had attempted to assault you, i know it wont happen, and my efforts of building trust would just go to waste anyway. So, you dont have to respond.
-</pre>
-</div>
-<div class="page">
-<pre>
-    24
-    
- I still love you deeply, but i think it's better to cut ties for now.
-</pre>
-</div>
-<div class="page">
-<pre>
-    25
-    
-To Keppie Qief, my brother. My homie, my comrade. If you are reading this, i just want to thank you for all the advice you gave me. However, I wont be able to use them anyway. It's not your fault, but mine. Im just blinded by my insanity that Im not able to see the opportunities to use these advices. Still, i appreciate them.
-</pre>
-</div>
-<div class="page">
-<pre>
-    26
-    
-To Athena, my friend. Im sorry. If you hate me right now, you have every right to stab me in my heart and kill me. I know being touchy with Danielle was... bad, to say the least... but, by leaving this message now... well, i dont know who's going to relay this message to you. Maybe Qief? Or Danielle perhaps? Im not sure, but just read this message for me, and forgive me. Please. Thank you.
-</pre>
-</div>
-<div class="page">
-<pre>
-    27
-    
-To all the others i hold dear. Once i return to school, expect my downfall, and do not support me whatsoever. It's meant to happen, said Fate, and we cannot do anything about it.
-</pre>
-</div>
-<div class="page">
-<pre>
-    28
-    
-This is not a goodbye message, but just a journal i selectively shared among you, the readers. You will not be hearing about a funeral soon, so dont worry about that. However... you may witness the mentally and spiritually lowest time of my life. Stay safe.
-
-- Dimp/Sacha.
-</pre>
-</div>
+  <!-- Collapsible Debug Log -->
+  <div id="debug-log-wrapper" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    font-family: monospace;
+    font-size: 12px;
+  ">
+    <div style="
+         background: #222;
+         color: #0f0;
+         padding: 5px 10px;
+         cursor: pointer;
+       "
+         onclick="toggleDebugLog()">
+      ⚙️ Debug Log (click to toggle)
+    </div>
+    <div id="debug-log" style="
+      background: black;
+      color: lime;
+      max-height: 150px;
+      overflow-y: auto;
+      padding: 10px;
+      display: none;
+      border-bottom: 2px solid lime;
+    "></div>
   </div>
-<!-- Collapsible Debug Log -->
-<div id="debug-log-wrapper" style="
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 9999;
-  font-family: monospace;
-  font-size: 12px;
-">
-  <div style="background: #222; color: #0f0; padding: 5px 10px; cursor: pointer;" onclick="toggleDebugLog()">
-    ⚙️ Debug Log (click to toggle)
-  </div>
-  <div id="debug-log" style="
-    background: black;
-    color: lime;
-    max-height: 150px;
-    overflow-y: auto;
-    padding: 10px;
-    display: none;
-    border-bottom: 2px solid lime;
-  "></div>
-</div>
+
   <script>
-  // Save original console methods
-  const originalConsoleLog = console.log;
-  const originalConsoleWarn = console.warn;
-  const originalConsoleError = console.error;
+    // Save original console methods
+    const originalConsoleLog  = console.log;
+    const originalConsoleWarn = console.warn;
+    const originalConsoleError= console.error;
 
-  // Unified logging function
-  function appendToDebugLog(type, ...args) {
-    const debugLog = document.getElementById("debug-log");
-    if (debugLog) {
-      const timestamp = new Date().toLocaleTimeString();
-      const color = type === 'log' ? 'lime' : type === 'warn' ? 'orange' : 'red';
-      const prefix = type.toUpperCase();
-      const msg = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-      ).join(' ');
-      debugLog.innerHTML += `<div style="color:${color};">[${timestamp}] ${prefix}: ${msg}</div>`;
-    }
-  }
-
-  // Override console methods
-  console.log = function (...args) {
-    originalConsoleLog.apply(console, args);
-    appendToDebugLog('log', ...args);
-  };
-
-  console.warn = function (...args) {
-    originalConsoleWarn.apply(console, args);
-    appendToDebugLog('warn', ...args);
-  };
-
-  console.error = function (...args) {
-    originalConsoleError.apply(console, args);
-    appendToDebugLog('error', ...args);
-  };
-</script>
-
-<script>
-  function toggleDebugLog() {
-    const logEl = document.getElementById("debug-log");
-    logEl.style.display = (logEl.style.display === "none") ? "block" : "none";
-  }
-
-  $(document).ready(function () {
-    const isMobile = window.innerWidth <= 768;
-
-    console.log("📖 Initializing flipbook...");
-    const pageCount = $('#flipbook .page').length;
-    console.log("📄 Pages detected: " + pageCount);
-
-    if (pageCount < 2) {
-      console.log("⚠️ At least 2 pages are needed for flipping to work.");
-      return;
+    function appendToDebugLog(type, ...args) {
+      const debugLog = document.getElementById("debug-log");
+      if (debugLog) {
+        const timestamp = new Date().toLocaleTimeString();
+        const color = (type === 'log' ? 'lime' : type === 'warn' ? 'orange' : 'red');
+        const prefix = type.toUpperCase();
+        const msg = args
+          .map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
+          .join(' ');
+        debugLog.innerHTML += `<div style="color:${color};">[${timestamp}] ${prefix}: ${msg}</div>`;
+      }
     }
 
-    if ($('#flipbook').turn) {
-      $('#flipbook').turn({
-        width: isMobile ? window.innerWidth * 0.9 : 800,
-        height: isMobile ? window.innerHeight * 0.7 : 600,
-        autoCenter: true,
-        display: isMobile ? 'single' : 'double',
-        elevation: 50,
-        gradients: true,
-      });
-      console.log("✅ Flipbook initialized successfully.");
-    } else {
-      console.log("❌ Turn.js is not available or not loaded.");
+    console.log = function (...args) {
+      originalConsoleLog.apply(console, args);
+      appendToDebugLog('log', ...args);
+    };
+    console.warn = function (...args) {
+      originalConsoleWarn.apply(console, args);
+      appendToDebugLog('warn', ...args);
+    };
+    console.error = function (...args) {
+      originalConsoleError.apply(console, args);
+      appendToDebugLog('error', ...args);
+    };
+
+    function toggleDebugLog() {
+      const logEl = document.getElementById("debug-log");
+      logEl.style.display = (logEl.style.display === "none") ? "block" : "none";
     }
+  </script>
 
-    // Optional: Touch fix for mobile
-    $('#flipbook').on('touchstart', function (event) {
-      const xStart = event.originalEvent.touches[0].clientX;
+  <script>
+    $(document).ready(function () {
+      const isMobile  = window.innerWidth <= 768;
+      const pages     = $('#flipbook .page');
+      const pageCount = pages.length;
 
-      $(this).one('touchend', function (event) {
-        const xEnd = event.originalEvent.changedTouches[0].clientX;
-        const distance = xStart - xEnd;
+      console.log("📖 Initializing flipbook...");
+      console.log("📄 Pages detected: " + pageCount);
 
-        if (Math.abs(distance) > 50) {
-          if (distance > 0) {
-            $(this).turn('next');
-          } else {
-            $(this).turn('previous');
-          }
+      if (pageCount < 2) {
+        console.log("⚠️ At least 2 pages are needed for flipping to work.");
+        return;
+      }
+
+      //
+      // 1) PRELOAD FIRST FEW PAGES (so static + early dynamic pages get numbered immediately)
+      //
+      //    We’ll preload, say, the first 4 pages. If they have a `data-src`, we load it;
+      //    otherwise (for a pure static page), we still apply a page number right away.
+      //
+      for (let i = 0; i < Math.min(100, pageCount); i++) {
+        const p       = i + 1;
+        const pageDiv = pages.eq(i);
+        const src     = pageDiv.data('src');
+
+        if (src) {
+          console.log(`📥 Preloading startup page ${p}: ${src}`);
+          pageDiv.load(src, function (response, status) {
+            if (status === "error") {
+              console.error(`❌ Failed to load page ${p}: ${src}`);
+              pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
+            } else {
+              pageDiv.data('loaded', true);
+              console.log(`✅ Page ${p} loaded`);
+            }
+            // Whether load succeeded or not, add/refresh the page number
+            pageDiv.find('.page-number').remove();
+            const pageNumber = document.createElement("div");
+            pageNumber.textContent = p;
+            pageNumber.className = "page-number";
+            Object.assign(pageNumber.style, {
+              position:     "absolute",
+              bottom:       "5px",
+              right:        "10px",
+              fontSize:     "12px",
+              color:        "#fff",
+              fontFamily:   "sans-serif",
+              pointerEvents:"none"
+            });
+            pageDiv.append(pageNumber);
+          });
+        } else {
+          // Static page (no data-src); just add the number
+          pageDiv.find('.page-number').remove();
+          const pageNumber = document.createElement("div");
+          pageNumber.textContent = p;
+          pageNumber.className = "page-number";
+          Object.assign(pageNumber.style, {
+            position:     "absolute",
+            bottom:       "5px",
+            right:        "10px",
+            fontSize:     "12px",
+            color:        "#fff",
+            fontFamily:   "sans-serif",
+            pointerEvents:"none"
+          });
+          pageDiv.append(pageNumber);
         }
+      }
+
+      //
+      // 2) INITIALIZE TURN.JS
+      //
+      if (typeof $('#flipbook').turn === "function") {
+        $('#flipbook').turn({
+          width:      isMobile ? window.innerWidth * 0.9 : 800,
+          height:     isMobile ? window.innerHeight * 0.7 : 600,
+          autoCenter: true,
+          display:    isMobile ? 'single' : 'double',
+          elevation:  50,
+          gradients:  true,
+          when: {
+            turning: function (event, page) {
+              const book       = $(this);
+              const totalPages = book.turn('pages');
+              const preloadRange = 5;
+              const preloadPages = [];
+
+              // Build list of “p” values we want to ensure are loaded
+              for (let offset = -preloadRange; offset <= preloadRange; offset++) {
+                const pCheck = page + offset;
+                if (pCheck >= 1 && pCheck <= totalPages) {
+                  preloadPages.push(pCheck);
+                }
+              }
+
+              // For each p in that range, load (if not yet loaded), then add page number
+              preloadPages.forEach(p => {
+                const pageDiv = book.find('.page').eq(p - 1);
+                const src     = pageDiv.data('src');
+                const loaded  = pageDiv.data('loaded');
+
+                if (src && !loaded) {
+                  console.log(`📥 Preloading page ${p} from ${src}`);
+                  pageDiv.load(src, function (response, status) {
+                    if (status === "error") {
+                      console.error(`❌ Failed to load page ${p}: ${src}`);
+                      pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
+                    } else {
+                      pageDiv.data('loaded', true);
+                      console.log(`✅ Page ${p} loaded`);
+                    }
+                    // Remove old number and re-append correct page number
+                    pageDiv.find('.page-number').remove();
+                    const pageNumber = document.createElement("div");
+                    pageNumber.textContent = p;
+                    pageNumber.className = "page-number";
+                    Object.assign(pageNumber.style, {
+                      position:      "absolute",
+                      bottom:        "0px",
+                      right:         "10px",
+                      fontSize:      "24px",
+                      color:         "#fff",
+                      fontFamily:    "sans-serif",
+                      pointerEvents: "none"
+                    });
+                    pageDiv.append(pageNumber);
+                  });
+                } else if (!src) {
+                  // If there is no data-src (i.e. a fully static page), just ensure its number is correct:
+                  pageDiv.find('.page-number').remove();
+                  const pageNumber = document.createElement("div");
+                  pageNumber.textContent = p;
+                  pageNumber.className = "page-number";
+                  Object.assign(pageNumber.style, {
+                    position:      "absolute",
+                    bottom:        "0px",
+                    right:         "10px",
+                    fontSize:      "24px",
+                    color:         "#fff",
+                    fontFamily:    "sans-serif",
+                    pointerEvents: "none"
+                  });
+                  pageDiv.append(pageNumber);
+                }
+              });
+            }
+          }
+        });
+
+        console.log("✅ Flipbook initialized successfully.");
+      } else {
+        console.log("❌ Turn.js is not available or not loaded.");
+      }
+
+      // 3) TOUCH SWIPE FIX (desktop mobile hybrid)
+      $('#flipbook').on('touchstart', function (event) {
+        const xStart = event.originalEvent.touches[0].clientX;
+        $(this).one('touchend', function (event) {
+          const xEnd    = event.originalEvent.changedTouches[0].clientX;
+          const distance= xStart - xEnd;
+          if (Math.abs(distance) > 50) {
+            if (distance > 0)   $(this).turn('next');
+            else                $(this).turn('previous');
+          }
+        });
       });
     });
-  });
-</script>
+  </script>
 </body>
 </html>
