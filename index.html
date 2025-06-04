@@ -1,0 +1,40 @@
+<!-- Save this as quiz.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Quiz</title>
+  <style>
+      body {
+          display: grid;
+          place-items: center;
+          height: 100vh;
+          font-size: 3.5vw
+      }
+  </style>
+  
+  <script>
+    function checkAnswer() {
+      const correctAnswers = ["qief", "danielle", "umairah", "sacha"];
+      const debugAnswer = ["debug-lovelessjournal"]
+      const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+
+      if (correctAnswers.includes(userAnswer)) {
+        // Redirect to success page
+        window.location.href = "journal.html";
+      } else if (debugAnswer.includes(userAnswer)) {
+        // Redirect to success page
+        window.location.href = "journal-testing.html";
+      } else {
+        // Redirect to exit/failure page
+        window.location.href = "exit.html";
+      }
+    }
+  </script>
+</head>
+<body>
+  <h2>Login to ???</h2>
+  <p>What is your name?</p>
+  <input type="text" id="answer" placeholder="Your actual name here" />
+  <button onclick="checkAnswer()">Submit</button>
+</body>
+</html>

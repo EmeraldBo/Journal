@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Timeless Journal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ccc;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Stable wrapper */
+    #flipbook-wrapper {
+      width: 90vw;
+      height: 60vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Flipbook takes full wrapper size */
+    #flipbook {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Each page is half the book width */
+    #flipbook .page {
+      width: 45vw;
+      height: 60vh;
+      background: white;
+      box-sizing: border-box;
+      padding: 20px;
+      overflow: hidden;
+      font-family: serif;
+      font-size: clamp(14px, 2vw, 18px);
+      line-height: 1.4;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      position: relative; /* ensure we can absolutely position page numbers inside */
+    }
+    #flipbook .page pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      word-break: break-word;
+    }
+    #flipbook .page img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 1rem;
+    }
+
+    #centerText {
+      position: fixed;
+      top: 10vh;
+      left: 50vw;
+      transform: translate(-50%, -50%);
+      font-size: clamp(12px, 4vw, 24px);
+      font-family: sans-serif;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 10000;
+    }
+
+    /* Optional style tweak for page‐number div */
+    .page-number {
+      font-weight: bold;
+      opacity: 0.6;
+    }
+  </style>
+
+  <!-- 1) jQuery 1.9.1 (must load first) -->
+  <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <!-- 2) Turn.js 3 (must load second) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+
+  <script>
+    // Left/Right arrow navigation
+    $(document).keydown(function(e) {
+      switch (e.key) {
+        case 'ArrowLeft':
+          $('#flipbook').turn('previous');
+          break;
+        case 'ArrowRight':
+          $('#flipbook').turn('next');
+          break;
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <!-- Center‐screen hint -->
+  <script>
+    $(document).ready(function () {
+      const isPC = window.innerWidth >= 768;
+      const centerText = document.createElement('div');
+      centerText.id = 'centerText';
+      centerText.textContent = 'Use Arrow Keys (PC) or Swipe/Tap (Mobile) to navigate.';
+      document.body.appendChild(centerText);
+    });
+  </script>
+
+  <div id="flipbook-wrapper">
+    <div id="flipbook">
+      <!-- Page 1 (static) -->
+      <div class="page">
+        <pre>
+Timeless Journal
+        
+by ???
+        </pre>
+        <img src="doodles/doodle-title-2.jpg"
+             alt="Timeless Journal title doodle">
+      </div>
+
+      <!-- Page 2 (dynamic) -->
+      <div class="page" data-src="Pages/20XX/page1.html"></div>
+
+      <!-- 2024 -->
+      <div class="page" data-src="Pages/2024/page1.html"></div>
+      <div class="page" data-src="Pages/2024/page2.html"></div>
+      <div class="page" data-src="Pages/2024/page3.html"></div>
+
+      <!-- January 2025 -->
+      <div class="page" data-src="Pages/2025/January/page1.html"></div>
+      <div class="page" data-src="Pages/2025/January/page2.html"></div>
+      <div class="page" data-src="Pages/2025/January/page3.html"></div>
+
+      <!-- February 2025 -->
+      <div class="page" data-src="Pages/2025/February/page1.html"></div>
+
+      <!-- March 2025 -->
+      <div class="page" data-src="Pages/2025/March/page1.html"></div>
+      <div class="page" data-src="Pages/2025/March/page2.html"></div>
+
+      <!-- April 2025 -->
+      <div class="page" data-src="Pages/2025/April/page1.html"></div>
+      <div class="page" data-src="Pages/2025/April/page2.html"></div>
+
+      <!-- May 2025 -->
+      <div class="page" data-src="Pages/2025/May/page1.html"></div>
+      <div class="page" data-src="Pages/2025/May/page2.html"></div>
+      <div class="page" data-src="Pages/2025/May/page3.html"></div>
+      <div class="page" data-src="Pages/2025/May/page4.html"></div>
+
+      <!-- June 2025 -->
+      <div class="page" data-src="Pages/2025/June/page1.html"></div>
+
+      <div class="page" data-src="Pages/Other/blank.html"></div>
+      <div class="page" data-src="Pages/Other/blank.html"></div>
+      <div class="page" data-src="Pages/Other/lettertitle.html"></div>
+
+
+      <!-- Letter (SpecialMessage) -->
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page1.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page2.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page3.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page4.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page5.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page6.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page7.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page8.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page9.html"></div>
+      <div class="page" data-src="Pages/SpecialMessage/Letter/page10.html"></div>
+    </div> <!-- /#flipbook -->
+  </div> <!-- /#flipbook-wrapper -->
+
+  <!-- Collapsible Debug Log -->
+  <div id="debug-log-wrapper" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    font-family: monospace;
+    font-size: 12px;
+  ">
+    <div style="
+         background: #222;
+         color: #0f0;
+         padding: 5px 10px;
+         cursor: pointer;
+       "
+         onclick="toggleDebugLog()">
+      ⚙️ Debug Log (click to toggle)
+    </div>
+    <div id="debug-log" style="
+      background: black;
+      color: lime;
+      max-height: 150px;
+      overflow-y: auto;
+      padding: 10px;
+      display: none;
+      border-bottom: 2px solid lime;
+    "></div>
+  </div>
+
+  <script>
+    // Save original console methods
+    const originalConsoleLog  = console.log;
+    const originalConsoleWarn = console.warn;
+    const originalConsoleError= console.error;
+
+    function appendToDebugLog(type, ...args) {
+      const debugLog = document.getElementById("debug-log");
+      if (debugLog) {
+        const timestamp = new Date().toLocaleTimeString();
+        const color = (type === 'log' ? 'lime' : type === 'warn' ? 'orange' : 'red');
+        const prefix = type.toUpperCase();
+        const msg = args
+          .map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
+          .join(' ');
+        debugLog.innerHTML += `<div style="color:${color};">[${timestamp}] ${prefix}: ${msg}</div>`;
+      }
+    }
+
+    console.log = function (...args) {
+      originalConsoleLog.apply(console, args);
+      appendToDebugLog('log', ...args);
+    };
+    console.warn = function (...args) {
+      originalConsoleWarn.apply(console, args);
+      appendToDebugLog('warn', ...args);
+    };
+    console.error = function (...args) {
+      originalConsoleError.apply(console, args);
+      appendToDebugLog('error', ...args);
+    };
+
+    function toggleDebugLog() {
+      const logEl = document.getElementById("debug-log");
+      logEl.style.display = (logEl.style.display === "none") ? "block" : "none";
+    }
+  </script>
+
+  <script>
+    $(document).ready(function () {
+      const isMobile  = window.innerWidth <= 768;
+      const pages     = $('#flipbook .page');
+      const pageCount = pages.length;
+
+      console.log("📖 Initializing flipbook...");
+      console.log("📄 Pages detected: " + pageCount);
+
+      if (pageCount < 2) {
+        console.log("⚠️ At least 2 pages are needed for flipping to work.");
+        return;
+      }
+
+      //
+      // 1) PRELOAD FIRST FEW PAGES (so static + early dynamic pages get numbered immediately)
+      //
+      //    We’ll preload, say, the first 4 pages. If they have a `data-src`, we load it;
+      //    otherwise (for a pure static page), we still apply a page number right away.
+      //
+      for (let i = 0; i < Math.min(100, pageCount); i++) {
+        const p       = i + 1;
+        const pageDiv = pages.eq(i);
+        const src     = pageDiv.data('src');
+
+        if (src) {
+          console.log(`📥 Preloading startup page ${p}: ${src}`);
+          pageDiv.load(src, function (response, status) {
+            if (status === "error") {
+              console.error(`❌ Failed to load page ${p}: ${src}`);
+              pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
+            } else {
+              pageDiv.data('loaded', true);
+              console.log(`✅ Page ${p} loaded`);
+            }
+            // Whether load succeeded or not, add/refresh the page number
+            pageDiv.find('.page-number').remove();
+            const pageNumber = document.createElement("div");
+            pageNumber.textContent = p;
+            pageNumber.className = "page-number";
+            Object.assign(pageNumber.style, {
+              position:     "absolute",
+              bottom:       "5px",
+              right:        "10px",
+              fontSize:     "12px",
+              color:        "#fff",
+              fontFamily:   "sans-serif",
+              pointerEvents:"none"
+            });
+            pageDiv.append(pageNumber);
+          });
+        } else {
+          // Static page (no data-src); just add the number
+          pageDiv.find('.page-number').remove();
+          const pageNumber = document.createElement("div");
+          pageNumber.textContent = p;
+          pageNumber.className = "page-number";
+          Object.assign(pageNumber.style, {
+            position:     "absolute",
+            bottom:       "5px",
+            right:        "10px",
+            fontSize:     "12px",
+            color:        "#fff",
+            fontFamily:   "sans-serif",
+            pointerEvents:"none"
+          });
+          pageDiv.append(pageNumber);
+        }
+      }
+
+      //
+      // 2) INITIALIZE TURN.JS
+      //
+      if (typeof $('#flipbook').turn === "function") {
+        $('#flipbook').turn({
+          width:      isMobile ? window.innerWidth * 0.9 : 800,
+          height:     isMobile ? window.innerHeight * 0.7 : 600,
+          autoCenter: true,
+          display:    isMobile ? 'single' : 'double',
+          elevation:  50,
+          gradients:  true,
+          when: {
+            turning: function (event, page) {
+              const book       = $(this);
+              const totalPages = book.turn('pages');
+              const preloadRange = 5;
+              const preloadPages = [];
+
+              // Build list of “p” values we want to ensure are loaded
+              for (let offset = -preloadRange; offset <= preloadRange; offset++) {
+                const pCheck = page + offset;
+                if (pCheck >= 1 && pCheck <= totalPages) {
+                  preloadPages.push(pCheck);
+                }
+              }
+
+              // For each p in that range, load (if not yet loaded), then add page number
+              preloadPages.forEach(p => {
+                const pageDiv = book.find('.page').eq(p - 1);
+                const src     = pageDiv.data('src');
+                const loaded  = pageDiv.data('loaded');
+
+                if (src && !loaded) {
+                  console.log(`📥 Preloading page ${p} from ${src}`);
+                  pageDiv.load(src, function (response, status) {
+                    if (status === "error") {
+                      console.error(`❌ Failed to load page ${p}: ${src}`);
+                      pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
+                    } else {
+                      pageDiv.data('loaded', true);
+                      console.log(`✅ Page ${p} loaded`);
+                    }
+                    // Remove old number and re-append correct page number
+                    pageDiv.find('.page-number').remove();
+                    const pageNumber = document.createElement("div");
+                    pageNumber.textContent = p;
+                    pageNumber.className = "page-number";
+                    Object.assign(pageNumber.style, {
+                      position:      "absolute",
+                      bottom:        "0px",
+                      right:         "10px",
+                      fontSize:      "24px",
+                      color:         "#fff",
+                      fontFamily:    "sans-serif",
+                      pointerEvents: "none"
+                    });
+                    pageDiv.append(pageNumber);
+                  });
+                } else if (!src) {
+                  // If there is no data-src (i.e. a fully static page), just ensure its number is correct:
+                  pageDiv.find('.page-number').remove();
+                  const pageNumber = document.createElement("div");
+                  pageNumber.textContent = p;
+                  pageNumber.className = "page-number";
+                  Object.assign(pageNumber.style, {
+                    position:      "absolute",
+                    bottom:        "0px",
+                    right:         "10px",
+                    fontSize:      "24px",
+                    color:         "#fff",
+                    fontFamily:    "sans-serif",
+                    pointerEvents: "none"
+                  });
+                  pageDiv.append(pageNumber);
+                }
+              });
+            }
+          }
+        });
+
+        console.log("✅ Flipbook initialized successfully.");
+      } else {
+        console.log("❌ Turn.js is not available or not loaded.");
+      }
+
+      // 3) TOUCH SWIPE FIX (desktop mobile hybrid)
+      $('#flipbook').on('touchstart', function (event) {
+        const xStart = event.originalEvent.touches[0].clientX;
+        $(this).one('touchend', function (event) {
+          const xEnd    = event.originalEvent.changedTouches[0].clientX;
+          const distance= xStart - xEnd;
+          if (Math.abs(distance) > 50) {
+            if (distance > 0)   $(this).turn('next');
+            else                $(this).turn('previous');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
