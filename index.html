@@ -5,7 +5,9 @@
   <title>Simple Quiz</title>
   <style>
       body {
-          display: grid;
+          display: inline-block;
+          height: auto;
+          width: 100%;
           place-items: center;
           height: 100vh;
           font-size: 3.5vw
@@ -14,27 +16,45 @@
   
   <script>
     function checkAnswer() {
-      const correctAnswers = ["qief", "danielle", "umairah", "sacha", "mathias", "isaiah"];
-      const debugAnswer = ["debug-lovelessjournal"]
-      const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+      const registeredAccounts = [["qief", 'password'], ["danielle", 'password'], ["umairah", 'SomethingAboutStrawberry']];
+      const debugAcc = [['debug', 'DEBUG-LOVELESSDIARY']]
+      const userName = document.getElementById('username').value.trim().toLowerCase();
+      const userPass = document.getElementById('password').value.trim();
+      
+      let matchFound = false
 
-      if (correctAnswers.includes(userAnswer)) {
+      for (let i = 0; i < registeredAccounts.length; i++) {
+        const account = registeredAccounts[i]
+        if (account[0] == userName && account[1] == userPass) {
+          matchFound = true;
+          break;
+        }
+      }
+      if (matchFound) {
         // Redirect to success page
         window.location.href = "journal.html";
-      } else if (debugAnswer.includes(userAnswer)) {
+      } else if (debugAcc[0][0] == userName && debugAcc[0][1] == userPass) {
         // Redirect to success page
         window.location.href = "journal-testing.html";
       } else {
         // Redirect to exit/failure page
-        window.location.href = "exit.html";
+        window.location.href = "login-fail.html";
       }
+
+      const username = document.getElementById('username').value.trim();
+    if (username) {
+      localStorage.setItem('journalUsername', username);
+      window.location.href = 'journal-testing.html';
+    }
     }
   </script>
 </head>
 <body>
   <h2>Login to ???</h2>
-  <p>What is your name?</p>
-  <input type="text" id="answer" placeholder="Your actual name here" />
+  <form>
+    <input type="text" autocomplete="username" id="username" placeholder="Username" />
+    <input type="password" autocomplete="current-password" id="password" placeholder="Password" />
+  </form>
   <button onclick="checkAnswer()">Submit</button>
 </body>
 </html>

@@ -2,8 +2,8 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Timeless Journal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeless Journal</n></title>
 
   <style>
     html, body {
@@ -45,7 +45,7 @@
       font-size: clamp(14px, 2vw, 18px);
       line-height: 1.4;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      position: relative; /* ensure we can absolutely position page numbers inside */
+      position: relative;
     }
     #flipbook .page pre {
       white-space: pre-wrap;
@@ -78,6 +78,31 @@
       font-weight: bold;
       opacity: 0.6;
     }
+    .comment-section {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      font-size: 12px;
+      font-family: sans-serif;
+    }
+    .comments-container {
+      max-height: 80px;
+      overflow-y: auto;
+      margin-bottom: 5px;
+      padding: 5px;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+    .comment-input {
+      width: 100%;
+      height: 40px;
+      resize: none;
+    }
+    .submit-comment {
+      margin-top: 4px;
+      float: right;
+    }
   </style>
 
   <!-- 1) jQuery 1.9.1 (must load first) -->
@@ -86,32 +111,191 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
 
   <script>
-    // Left/Right arrow navigation
-    $(document).keydown(function(e) {
-      switch (e.key) {
-        case 'ArrowLeft':
-          $('#flipbook').turn('previous');
-          break;
-        case 'ArrowRight':
-          $('#flipbook').turn('next');
-          break;
-      }
-    });
-  </script>
-</head>
-
-<body>
-  <!-- Center‐screen hint -->
-  <script>
     $(document).ready(function () {
+      // Center‐screen hint
       const isPC = window.innerWidth >= 768;
       const centerText = document.createElement('div');
       centerText.id = 'centerText';
       centerText.textContent = 'Use Arrow Keys (PC) or Swipe/Tap (Mobile) to navigate.';
       document.body.appendChild(centerText);
+
+      // Arrow navigation
+      $(document).keydown(function(e) {
+        switch (e.key) {
+          case 'ArrowLeft':
+            $('#flipbook').turn('previous');
+            break;
+          case 'ArrowRight':
+            $('#flipbook').turn('next');
+            break;
+        }
+      });
+
+      // Helper functions
+      function getCommentKey(pageNumber) {
+        return 'comments_page_' + pageNumber;
+      }
+      function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, m => ({
+          '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+        }[m]));
+      }
+function loadComments(pageNumber) {
+  const comments = JSON.parse(localStorage.getItem(getCommentKey(pageNumber)) || '[]');
+  const commentSection = document.querySelector('.comments-container'); // Global one at bottom
+  if (!commentSection) return;
+  commentSection.innerHTML = comments.map(c =>
+    `<div><strong>${c.user}:</strong> ${c.text}</div>`
+  ).join('');
+}
+
+      function addComment() {
+        const commentInput = document.querySelector('.comment-input');
+        const rawText = commentInput.value.trim();
+        if (rawText === '') {
+          alert('Please write a comment before submitting.');
+          return;
+        }
+        const commentText = escapeHTML(rawText);
+        const usernameRaw = localStorage.getItem('journalUsername') || 'Guest';
+        const username = escapeHTML(usernameRaw.charAt(0).toUpperCase() + usernameRaw.slice(1));
+
+        const currentPage = $('#flipbook').turn('page');
+        const key = getCommentKey(currentPage);
+        const existing = JSON.parse(localStorage.getItem(key)) || [];
+        existing.push({ user: username, text: commentText });
+        localStorage.setItem(key, JSON.stringify(existing));
+
+        commentInput.value = '';
+        loadComments(currentPage);
+      }
+
+      // Initialize flipbook
+      const pages = $('#flipbook .page');
+      const pageCount = pages.length;
+      if (pageCount < 2) {
+        console.warn('⚠️ At least 2 pages are needed for flipping to work.');
+      }
+      $('#flipbook').turn({
+        width:      400,
+        height:     600,
+        autoCenter: true,
+        display:    'single',
+        elevation:  50,
+        gradients:  true,
+        when: {
+          turned: function (event, page) {
+            loadComments(page);
+          }
+        }
+      });
+
+      // Preload first pages and add page numbers
+      pages.each(function(index) {
+        const p = index + 1;
+        const pageDiv = $(this);
+        const src = pageDiv.data('src');
+
+        if (src) {
+          pageDiv.load(src, function (response, status) {
+            if (status === 'error') {
+              pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
+            } else {
+              pageDiv.data('loaded', true);
+              loadComments(p);
+            }
+            // Add page number
+            pageDiv.find('.page-number').remove();
+            const numberEl = document.createElement('div');
+            numberEl.textContent = p;
+            numberEl.className = 'page-number';
+            Object.assign(numberEl.style, {
+              position:     'absolute',
+              bottom:       '5px',
+              right:        '10px',
+              fontSize:     '12px',
+              color:        '#fff',
+              fontFamily:   'sans-serif',
+              pointerEvents:'none'
+            });
+            pageDiv.append(numberEl);
+          });
+        } else {
+          // Static page: just add page number and comment container
+          pageDiv.find('.page-number').remove();
+          const numberEl = document.createElement('div');
+          numberEl.textContent = p;
+          numberEl.className = 'page-number';
+          Object.assign(numberEl.style, {
+            position:     'absolute',
+            bottom:       '5px',
+            right:        '10px',
+            fontSize:     '12px',
+            color:        '#fff',
+            fontFamily:   'sans-serif',
+            pointerEvents:'none'
+          });
+          pageDiv.append(numberEl);
+          loadComments(p);
+        }
+      });
+
+      // Attach comment button handler
+      document.querySelector('.submit-comment').addEventListener('click', addComment);
+
+      // Load comments for initial page
+      const initialPage = $('#flipbook').turn('page') || 1;
+      loadComments(initialPage);
+
+      // Touch swipe for mobile/desktop hybrid
+      $('#flipbook').on('touchstart', function (event) {
+        const xStart = event.originalEvent.touches[0].clientX;
+        $(this).one('touchend', function (event) {
+          const xEnd    = event.originalEvent.changedTouches[0].clientX;
+          const distance= xStart - xEnd;
+          if (Math.abs(distance) > 50) {
+            if (distance > 0)   $(this).turn('next');
+            else                $(this).turn('previous');
+          }
+        });
+      });
+
+      // Debug log override
+      const originalConsoleLog  = console.log;
+      const originalConsoleWarn = console.warn;
+      const originalConsoleError= console.error;
+      function appendToDebugLog(type, ...args) {
+        const debugLog = document.getElementById('debug-log');
+        if (debugLog) {
+          const timestamp = new Date().toLocaleTimeString();
+          const color = (type === 'log' ? 'lime' : type === 'warn' ? 'orange' : 'red');
+          const prefix = type.toUpperCase();
+          const msg = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg))).join(' ');
+          debugLog.innerHTML += `<div style="color:${color};">[${timestamp}] ${prefix}: ${msg}</div>`;
+        }
+      }
+      console.log = function (...args) {
+        originalConsoleLog.apply(console, args);
+        appendToDebugLog('log', ...args);
+      };
+      console.warn = function (...args) {
+        originalConsoleWarn.apply(console, args);
+        appendToDebugLog('warn', ...args);
+      };
+      console.error = function (...args) {
+        originalConsoleError.apply(console, args);
+        appendToDebugLog('error', ...args);
+      };
+      function toggleDebugLog() {
+        const logEl = document.getElementById('debug-log');
+        logEl.style.display = (logEl.style.display === 'none') ? 'block' : 'none';
+      }
+      $('#toggle-debug').on('click', toggleDebugLog);
     });
   </script>
+</head>
 
+<body>
   <div id="flipbook-wrapper">
     <div id="flipbook">
       <!-- Page 1 (static) -->
@@ -121,8 +305,7 @@ Timeless Journal
         
 by ???
         </pre>
-        <img src="doodles/doodle-title-2.jpg"
-             alt="Timeless Journal title doodle">
+        <img src="doodles/doodle-title-2.jpg" alt="Timeless Journal title doodle">
       </div>
 
       <!-- Page 2 (dynamic) -->
@@ -165,7 +348,6 @@ by ???
       <div class="page" data-src="Pages/Other/blank.html"></div>
       <div class="page" data-src="Pages/Other/lettertitle.html"></div>
 
-
       <!-- Letter (SpecialMessage) -->
       <div class="page" data-src="Pages/SpecialMessage/Letter/page1.html"></div>
       <div class="page" data-src="Pages/SpecialMessage/Letter/page2.html"></div>
@@ -180,242 +362,42 @@ by ???
     </div> <!-- /#flipbook -->
   </div> <!-- /#flipbook-wrapper -->
 
+  <!-- Comments -->
+  <div class="comment-section">
+    <h4>Comments</h4>
+    <div class="comments-container"></div>
+    <textarea class="comment-input" placeholder="Write a comment..."></textarea>
+    <button onclick="askPasswordAndClear()">Reset Comments</button>
+    <button class="submit-comment">Post Comment</button>
+  </div>
+
   <!-- Collapsible Debug Log -->
-  <div id="debug-log-wrapper" style="
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 9999;
-    font-family: monospace;
-    font-size: 12px;
-  ">
-    <div style="
-         background: #222;
-         color: #0f0;
-         padding: 5px 10px;
-         cursor: pointer;
-       "
-         onclick="toggleDebugLog()">
+  <div id="debug-log-wrapper" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; font-family: monospace; font-size: 12px;">
+    <div id="toggle-debug" style="background: #222; color: #0f0; padding: 5px 10px; cursor: pointer;">
       ⚙️ Debug Log (click to toggle)
     </div>
-    <div id="debug-log" style="
-      background: black;
-      color: lime;
-      max-height: 150px;
-      overflow-y: auto;
-      padding: 10px;
-      display: none;
-      border-bottom: 2px solid lime;
-    "></div>
+    <div id="debug-log" style="background: black; color: lime; max-height: 150px; overflow-y: auto; padding: 10px; display: none; border-bottom: 2px solid lime;"></div>
   </div>
 
   <script>
-    // Save original console methods
-    const originalConsoleLog  = console.log;
-    const originalConsoleWarn = console.warn;
-    const originalConsoleError= console.error;
-
-    function appendToDebugLog(type, ...args) {
-      const debugLog = document.getElementById("debug-log");
-      if (debugLog) {
-        const timestamp = new Date().toLocaleTimeString();
-        const color = (type === 'log' ? 'lime' : type === 'warn' ? 'orange' : 'red');
-        const prefix = type.toUpperCase();
-        const msg = args
-          .map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
-          .join(' ');
-        debugLog.innerHTML += `<div style="color:${color};">[${timestamp}] ${prefix}: ${msg}</div>`;
+    function askPasswordAndClear() {
+      const password = prompt("Enter admin password to reset comments:");
+      const correctPassword = "admin123";
+      if (password === correctPassword) {
+        clearComments();
+      } else {
+        alert("Incorrect password. Reset cancelled.");
       }
     }
 
-    console.log = function (...args) {
-      originalConsoleLog.apply(console, args);
-      appendToDebugLog('log', ...args);
-    };
-    console.warn = function (...args) {
-      originalConsoleWarn.apply(console, args);
-      appendToDebugLog('warn', ...args);
-    };
-    console.error = function (...args) {
-      originalConsoleError.apply(console, args);
-      appendToDebugLog('error', ...args);
-    };
-
-    function toggleDebugLog() {
-      const logEl = document.getElementById("debug-log");
-      logEl.style.display = (logEl.style.display === "none") ? "block" : "none";
-    }
-  </script>
-
-  <script>
-    $(document).ready(function () {
-      const isMobile  = window.innerWidth <= 768;
-      const pages     = $('#flipbook .page');
-      const pageCount = pages.length;
-
-      console.log("📖 Initializing flipbook...");
-      console.log("📄 Pages detected: " + pageCount);
-
-      if (pageCount < 2) {
-        console.log("⚠️ At least 2 pages are needed for flipping to work.");
-        return;
-      }
-
-      //
-      // 1) PRELOAD FIRST FEW PAGES (so static + early dynamic pages get numbered immediately)
-      //
-      //    We’ll preload, say, the first 4 pages. If they have a `data-src`, we load it;
-      //    otherwise (for a pure static page), we still apply a page number right away.
-      //
-      for (let i = 0; i < Math.min(100, pageCount); i++) {
-        const p       = i + 1;
-        const pageDiv = pages.eq(i);
-        const src     = pageDiv.data('src');
-
-        if (src) {
-          console.log(`📥 Preloading startup page ${p}: ${src}`);
-          pageDiv.load(src, function (response, status) {
-            if (status === "error") {
-              console.error(`❌ Failed to load page ${p}: ${src}`);
-              pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
-            } else {
-              pageDiv.data('loaded', true);
-              console.log(`✅ Page ${p} loaded`);
-            }
-            // Whether load succeeded or not, add/refresh the page number
-            pageDiv.find('.page-number').remove();
-            const pageNumber = document.createElement("div");
-            pageNumber.textContent = p;
-            pageNumber.className = "page-number";
-            Object.assign(pageNumber.style, {
-              position:     "absolute",
-              bottom:       "5px",
-              right:        "10px",
-              fontSize:     "12px",
-              color:        "#fff",
-              fontFamily:   "sans-serif",
-              pointerEvents:"none"
-            });
-            pageDiv.append(pageNumber);
-          });
-        } else {
-          // Static page (no data-src); just add the number
-          pageDiv.find('.page-number').remove();
-          const pageNumber = document.createElement("div");
-          pageNumber.textContent = p;
-          pageNumber.className = "page-number";
-          Object.assign(pageNumber.style, {
-            position:     "absolute",
-            bottom:       "5px",
-            right:        "10px",
-            fontSize:     "12px",
-            color:        "#fff",
-            fontFamily:   "sans-serif",
-            pointerEvents:"none"
-          });
-          pageDiv.append(pageNumber);
+    function clearComments() {
+      for (let key in localStorage) {
+        if (key.startsWith("comments_page_")) {
+          localStorage.removeItem(key);
         }
       }
-
-      //
-      // 2) INITIALIZE TURN.JS
-      //
-      if (typeof $('#flipbook').turn === "function") {
-        $('#flipbook').turn({
-          width:      isMobile ? window.innerWidth * 0.9 : 800,
-          height:     isMobile ? window.innerHeight * 0.7 : 600,
-          autoCenter: true,
-          display:    isMobile ? 'single' : 'double',
-          elevation:  50,
-          gradients:  true,
-          when: {
-            turning: function (event, page) {
-              const book       = $(this);
-              const totalPages = book.turn('pages');
-              const preloadRange = 5;
-              const preloadPages = [];
-
-              // Build list of “p” values we want to ensure are loaded
-              for (let offset = -preloadRange; offset <= preloadRange; offset++) {
-                const pCheck = page + offset;
-                if (pCheck >= 1 && pCheck <= totalPages) {
-                  preloadPages.push(pCheck);
-                }
-              }
-
-              // For each p in that range, load (if not yet loaded), then add page number
-              preloadPages.forEach(p => {
-                const pageDiv = book.find('.page').eq(p - 1);
-                const src     = pageDiv.data('src');
-                const loaded  = pageDiv.data('loaded');
-
-                if (src && !loaded) {
-                  console.log(`📥 Preloading page ${p} from ${src}`);
-                  pageDiv.load(src, function (response, status) {
-                    if (status === "error") {
-                      console.error(`❌ Failed to load page ${p}: ${src}`);
-                      pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
-                    } else {
-                      pageDiv.data('loaded', true);
-                      console.log(`✅ Page ${p} loaded`);
-                    }
-                    // Remove old number and re-append correct page number
-                    pageDiv.find('.page-number').remove();
-                    const pageNumber = document.createElement("div");
-                    pageNumber.textContent = p;
-                    pageNumber.className = "page-number";
-                    Object.assign(pageNumber.style, {
-                      position:      "absolute",
-                      bottom:        "0px",
-                      right:         "10px",
-                      fontSize:      "24px",
-                      color:         "#fff",
-                      fontFamily:    "sans-serif",
-                      pointerEvents: "none"
-                    });
-                    pageDiv.append(pageNumber);
-                  });
-                } else if (!src) {
-                  // If there is no data-src (i.e. a fully static page), just ensure its number is correct:
-                  pageDiv.find('.page-number').remove();
-                  const pageNumber = document.createElement("div");
-                  pageNumber.textContent = p;
-                  pageNumber.className = "page-number";
-                  Object.assign(pageNumber.style, {
-                    position:      "absolute",
-                    bottom:        "0px",
-                    right:         "10px",
-                    fontSize:      "24px",
-                    color:         "#fff",
-                    fontFamily:    "sans-serif",
-                    pointerEvents: "none"
-                  });
-                  pageDiv.append(pageNumber);
-                }
-              });
-            }
-          }
-        });
-
-        console.log("✅ Flipbook initialized successfully.");
-      } else {
-        console.log("❌ Turn.js is not available or not loaded.");
-      }
-
-      // 3) TOUCH SWIPE FIX (desktop mobile hybrid)
-      $('#flipbook').on('touchstart', function (event) {
-        const xStart = event.originalEvent.touches[0].clientX;
-        $(this).one('touchend', function (event) {
-          const xEnd    = event.originalEvent.changedTouches[0].clientX;
-          const distance= xStart - xEnd;
-          if (Math.abs(distance) > 50) {
-            if (distance > 0)   $(this).turn('next');
-            else                $(this).turn('previous');
-          }
-        });
-      });
-    });
+      location.reload();
+    }
   </script>
 </body>
 </html>
