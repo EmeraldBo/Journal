@@ -4,5 +4,8 @@
   },
   "devDependencies": {
     "gulp": "^5.0.1"
+  },
+  "scripts": {
+    "build": "gulp build"
   }
 }

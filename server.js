@@ -28,7 +28,7 @@ function saveComments() {
 
 const server = http.createServer((req, res) => {
   const origin = req.headers.origin;
-  if (origin === 'http://localhost:8000' || origin === 'http://127.0.0.1:8000') {
+  if (origin === 'http://https://voluble-babka-32e318.netlify.app' || origin === 'http://127.0.0.1:8000') {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
     res.setHeader('Access-Control-Allow-Origin', '*');
