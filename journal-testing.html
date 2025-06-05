@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Timeless Journal</n></title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
   <style>
     html, body {
@@ -79,11 +80,12 @@
       opacity: 0.6;
     }
     .comment-section {
-      position: absolute;
+      position: fixed;
       bottom: 10px;
       left: 10px;
       right: 10px;
       font-size: 12px;
+      z-index: 1000;
       font-family: sans-serif;
     }
     .comments-container {
@@ -111,6 +113,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
 
   <script>
+function fetchCommentsForCurrentPage() {
+  const page = $('#flipbook').turn('page') || 1; // get current page, default 1 if undefined
+  const baseUrl = 'https://script.google.com/macros/s/.../exec';
+
+  const url = "https://corsproxy.io/?" + encodeURIComponent(`${baseUrl}?page=${page}`);
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => console.log(`Comments for page ${page}:`, data.comments))
+    .catch(err => console.error("CORS Error:", err));
+}
+  </script>
+  <script>
     $(document).ready(function () {
       // Center‐screen hint
       const isPC = window.innerWidth >= 768;
@@ -132,43 +147,61 @@
       });
 
       // Helper functions
-      function getCommentKey(pageNumber) {
-        return 'comments_page_' + pageNumber;
-      }
+function getCommentKey(pageNumber) {
+  return 'comments_page_' + pageNumber;
+}
       function escapeHTML(str) {
         return str.replace(/[&<>"']/g, m => ({
           '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
         }[m]));
       }
-function loadComments(pageNumber) {
-  const comments = JSON.parse(localStorage.getItem(getCommentKey(pageNumber)) || '[]');
-  const commentSection = document.querySelector('.comments-container'); // Global one at bottom
-  if (!commentSection) return;
-  commentSection.innerHTML = comments.map(c =>
-    `<div><strong>${c.user}:</strong> ${c.text}</div>`
-  ).join('');
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxt5rnKNRnH42giuy4GBFFbqwPkxGog4zb3wa1LrJKQQME5mx1_e57YddsEO1lvdxIy/exec";
+
+async function loadComments(page = 1) {
+  try {
+    const response = await fetch(`https://script.google.com/macros/s/AKfycbzgYlWWLUb7ceEieoAzw_002EJboIzGFhWvkL7zrhWr24M1pLMU_49TJf4Z0lNXyTBZ/exec?page=${page}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    console.log("Loaded comments:", data.comments);
+    // displayComments(data.comments);
+  } catch (error) {
+    console.error('Failed to load comments:', error);
+    fetchCommentsForCurrentPage();
+  }
 }
 
-      function addComment() {
-        const commentInput = document.querySelector('.comment-input');
-        const rawText = commentInput.value.trim();
-        if (rawText === '') {
-          alert('Please write a comment before submitting.');
-          return;
-        }
-        const commentText = escapeHTML(rawText);
-        const usernameRaw = localStorage.getItem('journalUsername') || 'Guest';
-        const username = escapeHTML(usernameRaw.charAt(0).toUpperCase() + usernameRaw.slice(1));
 
-        const currentPage = $('#flipbook').turn('page');
-        const key = getCommentKey(currentPage);
-        const existing = JSON.parse(localStorage.getItem(key)) || [];
-        existing.push({ user: username, text: commentText });
-        localStorage.setItem(key, JSON.stringify(existing));
+async function addComment() {
+  const commentText = document.querySelector('.comment-input').value.trim();
+  if (!commentText) return;
 
-        commentInput.value = '';
-        loadComments(currentPage);
-      }
+  try {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbzgYlWWLUb7ceEieoAzw_002EJboIzGFhWvkL7zrhWr24M1pLMU_49TJf4Z0lNXyTBZ/exec', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ comment: commentText })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    console.log('Posted comment:', data.message);
+  } catch (error) {
+    console.error('Failed to post comment:', error);
+    fetchCommentsForCurrentPage();
+  }
+}
+
+
+
+
+
 
       // Initialize flipbook
       const pages = $('#flipbook .page');
@@ -177,8 +210,8 @@ function loadComments(pageNumber) {
         console.warn('⚠️ At least 2 pages are needed for flipping to work.');
       }
       $('#flipbook').turn({
-        width:      400,
-        height:     600,
+        width:      isPC ? 400  : window.innerWidth * 0.9,
+        height:     isPC ? 600  : window.innerHeight * 0.8,
         autoCenter: true,
         display:    'single',
         elevation:  50,
@@ -202,7 +235,6 @@ function loadComments(pageNumber) {
               pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
             } else {
               pageDiv.data('loaded', true);
-              loadComments(p);
             }
             // Add page number
             pageDiv.find('.page-number').remove();
@@ -293,9 +325,53 @@ function loadComments(pageNumber) {
       $('#toggle-debug').on('click', toggleDebugLog);
     });
   </script>
+  <script>
+  // 🔓 Toggle Comments Visibility (Global Function)
+  function toggleComments() {
+    const body = document.getElementById('commentBody');
+    const btn = document.querySelector('.collapse-btn');
+    const isVisible = body.style.display === 'block';
+
+    body.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? '💬 Show Comments' : '💬 Hide Comments';
+  }
+
+  // 🧽 Reset Comments After Password Prompt
+  function askPasswordAndClear() {
+    const password = prompt("Enter password to reset comments:");
+    if (password === 'reset123') {
+      const container = document.querySelector('.comments-container');
+      localStorage.removeItem(getCommentKey());
+      container.innerHTML = '';
+    } else {
+      alert("Incorrect password.");
+    }
+  }
+
+  // 🧠 Generate Unique Key for Page
+  function getCommentKey() {
+    const pageId = document.querySelector('[data-journal-id]');
+    return 'comments-' + (pageId ? pageId.dataset.journalId : location.pathname);
+  }
+  </script>
 </head>
 
 <body>
+
+  <!-- Comments -->
+  <div class="comment-section">
+    <button class="collapse-btn" onclick="toggleComments()">💬 Show Comments</button>
+    <div id="commentBody" class="comments-body" style="display: none;">
+    
+    <h4>Comments</h4>
+    <div class="comments-container"></div>
+    <textarea class="comment-input" placeholder="Write a comment..."></textarea>
+    <button onclick="askPasswordAndClear()">Reset Comments</button>
+    <button class="submit-comment">Post Comment</button>
+    </div>
+  </div>
+
+
   <div id="flipbook-wrapper">
     <div id="flipbook">
       <!-- Page 1 (static) -->
@@ -343,6 +419,7 @@ by ???
       <div class="page" data-src="Pages/2025/June/page2.html"></div>
       <div class="page" data-src="Pages/2025/June/page3.html"></div>
       <div class="page" data-src="Pages/2025/June/page4.html"></div>
+      <div class="page" data-src="Pages/2025/June/page5.html"></div>
 
       <div class="page" data-src="Pages/Other/blank.html"></div>
       <div class="page" data-src="Pages/Other/blank.html"></div>
@@ -361,15 +438,6 @@ by ???
       <div class="page" data-src="Pages/SpecialMessage/Letter/page10.html"></div>
     </div> <!-- /#flipbook -->
   </div> <!-- /#flipbook-wrapper -->
-
-  <!-- Comments -->
-  <div class="comment-section">
-    <h4>Comments</h4>
-    <div class="comments-container"></div>
-    <textarea class="comment-input" placeholder="Write a comment..."></textarea>
-    <button onclick="askPasswordAndClear()">Reset Comments</button>
-    <button class="submit-comment">Post Comment</button>
-  </div>
 
   <!-- Collapsible Debug Log -->
   <div id="debug-log-wrapper" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; font-family: monospace; font-size: 12px;">
