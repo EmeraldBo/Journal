@@ -1,21 +1,22 @@
-<!-- Save this as quiz.html -->
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Simple Quiz</title>
+  <title>Login</title>
   <style>
       body {
-          display: inline-block;
-          height: auto;
-          width: 100%;
-          place-items: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
           height: 100vh;
-          font-size: 3.5vw
+          font-size: 3.5vw;
+          background: #f0f0f0;
       }
+      .error { color: red; margin-top: 1em; }
   </style>
-  
 <script>
-  function checkAnswer() {
+  function checkAnswer(event) {
+    event.preventDefault();
     const registeredAccounts = [["qief", 'password'], ["danielle", '072319'], ["umairah", 'SomethingAboutStrawberry']];
     const debugAcc = [['debug', 'DEBUG-LOVELESSDIARY']];
     const userName = document.getElementById('username').value.trim().toLowerCase();
@@ -38,17 +39,18 @@
       localStorage.setItem('journalUsername', userName);
       window.location.href = "journal-testing.html";
     } else {
-      window.location.href = "login-fail.html";
+      document.getElementById('errorMsg').textContent = "Incorrect username or password.";
     }
   }
 </script>
 </head>
 <body>
   <h2>Login to ???</h2>
-  <form>
+  <form onsubmit="checkAnswer(event)">
     <input type="text" autocomplete="username" id="username" placeholder="Username" />
     <input type="password" autocomplete="current-password" id="password" placeholder="Password" />
+    <button type="submit">Submit</button>
   </form>
-  <button onclick="checkAnswer()">Submit</button>
+  <div id="errorMsg" class="error"></div>
 </body>
 </html>

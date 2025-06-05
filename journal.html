@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Timeless Journal</n></title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
   <style>
     html, body {
@@ -79,11 +80,12 @@
       opacity: 0.6;
     }
     .comment-section {
-      position: absolute;
+      position: fixed;
       bottom: 10px;
       left: 10px;
       right: 10px;
       font-size: 12px;
+      z-index: 1000;
       font-family: sans-serif;
     }
     .comments-container {
@@ -109,7 +111,6 @@
   <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
   <!-- 2) Turn.js 3 (must load second) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
-
   <script>
     $(document).ready(function () {
       // Center‐screen hint
@@ -130,45 +131,6 @@
             break;
         }
       });
-
-      // Helper functions
-      function getCommentKey(pageNumber) {
-        return 'comments_page_' + pageNumber;
-      }
-      function escapeHTML(str) {
-        return str.replace(/[&<>"']/g, m => ({
-          '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
-        }[m]));
-      }
-function loadComments(pageNumber) {
-  const comments = JSON.parse(localStorage.getItem(getCommentKey(pageNumber)) || '[]');
-  const commentSection = document.querySelector('.comments-container'); // Global one at bottom
-  if (!commentSection) return;
-  commentSection.innerHTML = comments.map(c =>
-    `<div><strong>${c.user}:</strong> ${c.text}</div>`
-  ).join('');
-}
-
-      function addComment() {
-        const commentInput = document.querySelector('.comment-input');
-        const rawText = commentInput.value.trim();
-        if (rawText === '') {
-          alert('Please write a comment before submitting.');
-          return;
-        }
-        const commentText = escapeHTML(rawText);
-        const usernameRaw = localStorage.getItem('journalUsername') || 'Guest';
-        const username = escapeHTML(usernameRaw.charAt(0).toUpperCase() + usernameRaw.slice(1));
-
-        const currentPage = $('#flipbook').turn('page');
-        const key = getCommentKey(currentPage);
-        const existing = JSON.parse(localStorage.getItem(key)) || [];
-        existing.push({ user: username, text: commentText });
-        localStorage.setItem(key, JSON.stringify(existing));
-
-        commentInput.value = '';
-        loadComments(currentPage);
-      }
 
       // Initialize flipbook
       const pages = $('#flipbook .page');
@@ -202,7 +164,6 @@ function loadComments(pageNumber) {
               pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
             } else {
               pageDiv.data('loaded', true);
-              loadComments(p);
             }
             // Add page number
             pageDiv.find('.page-number').remove();
@@ -293,9 +254,119 @@ function loadComments(pageNumber) {
       $('#toggle-debug').on('click', toggleDebugLog);
     });
   </script>
+<script>
+  function escapeHTML(str) {
+    return str.replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[m]));
+  }
+
+  // Display comments in the comments-container
+  function displayComments(comments) {
+    const container = document.querySelector('.comments-container');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!comments || comments.length === 0) {
+      container.innerHTML = '<div style="color:gray;">No comments yet.</div>';
+      return;
+    }
+    comments.forEach(comment => {
+      const div = document.createElement('div');
+      div.innerHTML = `<b>${escapeHTML(comment.user)}:</b> ${escapeHTML(comment.text)}`;
+      container.appendChild(div);
+    });
+  }
+
+  // Load comments for a page from backend
+  async function loadComments(page = 1) {
+    try {
+      const response = await fetch(`http://localhost:8000/comments?page=${page}`, {
+        method: 'GET',
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      console.log("Loaded comments:", data.comments);
+      displayComments(data.comments);
+    } catch (error) {
+      console.error('Failed to load comments:', error);
+      displayComments([]);
+    }
+  }
+
+  // Add a comment via backend
+async function addComment() {
+  const commentText = document.querySelector('.comment-input').value.trim();
+  if (!commentText) return;
+  const page = $('#flipbook').turn('page') || 1;
+  const user = localStorage.getItem('journalUsername') || 'User'; // <-- Get username from localStorage
+  try {
+    const response = await fetch('http://localhost:8000/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      body: JSON.stringify({ user: user, text: escapeHTML(commentText), page })
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    console.log('Posted comment:', data.message);
+    document.querySelector('.comment-input').value = '';
+    loadComments(page);
+  } catch (error) {
+    console.error('Failed to post comment:', error);
+  }
+}
+
+  // Reset comments via backend (requires backend endpoint)
+  async function askPasswordAndClear() {
+    const password = prompt("Enter password to reset comments:");
+    if (password === 'reset123') {
+      try {
+        const page = $('#flipbook').turn('page') || 1;
+        const response = await fetch('http://localhost:8000/comments/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password, page })
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        alert('Comments reset.');
+        loadComments(page);
+      } catch (error) {
+        alert('Failed to reset comments.');
+      }
+    } else {
+      alert("Incorrect password.");
+    }
+  }
+
+  // Toggle comments visibility
+  function toggleComments() {
+    const body = document.getElementById('commentBody');
+    const btn = document.querySelector('.collapse-btn');
+    const isVisible = body.style.display === 'block';
+    body.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? '💬 Show Comments' : '💬 Hide Comments';
+  }
+</script>
 </head>
 
 <body>
+
+  <!-- Comments -->
+  <div class="comment-section">
+    <button class="collapse-btn" onclick="toggleComments()">💬 Show Comments</button>
+    <div id="commentBody" class="comments-body" style="display: none;">
+    
+    <h4>Comments</h4>
+    <div class="comments-container"></div>
+    <textarea class="comment-input" placeholder="Write a comment..."></textarea>
+    <button onclick="askPasswordAndClear()">Reset Comments</button>
+    <button class="submit-comment">Post Comment</button>
+    </div>
+  </div>
+
+
   <div id="flipbook-wrapper">
     <div id="flipbook">
       <!-- Page 1 (static) -->
@@ -363,15 +434,6 @@ by ???
     </div> <!-- /#flipbook -->
   </div> <!-- /#flipbook-wrapper -->
 
-  <!-- Comments -->
-  <div class="comment-section">
-    <h4>Comments</h4>
-    <div class="comments-container"></div>
-    <textarea class="comment-input" placeholder="Write a comment..."></textarea>
-    <button onclick="askPasswordAndClear()">Reset Comments</button>
-    <button class="submit-comment">Post Comment</button>
-  </div>
-
   <!-- Collapsible Debug Log -->
   <div id="debug-log-wrapper" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; font-family: monospace; font-size: 12px;">
     <div id="toggle-debug" style="background: #222; color: #0f0; padding: 5px 10px; cursor: pointer;">
@@ -381,15 +443,6 @@ by ???
   </div>
 
   <script>
-    function askPasswordAndClear() {
-      const password = prompt("Enter admin password to reset comments:");
-      const correctPassword = "admin123";
-      if (password === correctPassword) {
-        clearComments();
-      } else {
-        alert("Incorrect password. Reset cancelled.");
-      }
-    }
 
     function clearComments() {
       for (let key in localStorage) {
