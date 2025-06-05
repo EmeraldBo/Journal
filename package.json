@@ -2,4 +2,10 @@
   "dependencies": {
     "express": "^5.1.0"
   }
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  }
+  "scripts": {
+    "build": "gulp build"
+  }
 }
