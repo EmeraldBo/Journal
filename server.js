@@ -7,6 +7,11 @@ const hostname = '127.0.0.1';
 const port = 8000;
 const COMMENTS_FILE = 'comments.json';
 
+const { createClient } = require('@supabase/supabase-js');
+const SUPABASE_URL = 'https://iwzzrkvbdpzkxuiyvnrh.supabase.co'; // Replace with your URL
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3enpya3ZiZHB6a3h1aXl2bnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxNjM1ODQsImV4cCI6MjA2NDczOTU4NH0.RWfvuIn-ITSGLo1MyARW6lPLSePXhVnKKSgKa9rzdY8'; // Replace with your anon key
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // Load comments from file at startup
 let comments = {};
 try {
@@ -46,41 +51,48 @@ const server = http.createServer((req, res) => {
   const pathname = parsedUrl.pathname;
 
   // --- COMMENTS API ---
-  if (pathname === '/comments') {
-    if (req.method === 'GET') {
-      const page = parsedUrl.query.page || 1;
-      const pageComments = comments[page] || [];
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ comments: pageComments }));
-    } else if (req.method === 'POST') {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
+ if (pathname === '/comments') {
+  if (req.method === 'GET') {
+    const page = parsedUrl.query.page || 1;
+    supabase
+      .from('comments')
+      .select('*')
+      .eq('page', page)
+      .order('created_at', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ message: 'Failed to fetch comments' }));
+        } else {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ comments: data }));
+        }
       });
-      req.on('end', () => {
-        try {
-          const newComment = JSON.parse(body);
-          const page = newComment.page || 1;
-          if (!comments[page]) {
-            comments[page] = [];
-          }
-          comments[page].push(newComment);
-          saveComments(); // Save to file
+  } else if (req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', async () => {
+      try {
+        const newComment = JSON.parse(body);
+        const { user, text, page } = newComment;
+        const { error } = await supabase
+          .from('comments')
+          .insert([{ user, text, page }]);
+        if (error) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ message: 'Failed to add comment' }));
+        } else {
           res.statusCode = 201;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ message: 'Comment added successfully' }));
-        } catch (error) {
-          res.statusCode = 400;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ message: 'Invalid JSON in request body' }));
-          console.error('Error parsing JSON:', error);
         }
-      });
-    } else {
-      res.statusCode = 405;
-      res.end('Method Not Allowed');
-    }
+      } catch (error) {
+        res.statusCode = 400;
+        res.end(JSON.stringify({ message: 'Invalid JSON in request body' }));
+      }
+    });
+  }
   } else if (pathname === '/comments/reset' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => {
@@ -96,15 +108,31 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({ message: 'Incorrect password' }));
           return;
         }
-        if (page) {
-          comments[page] = [];
-        } else {
-          comments = {};
-        }
-        saveComments(); // Save to file
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ message: 'Comments reset' }));
+        (async () => {
+  let error;
+  if (page) {
+    // Delete comments for a specific page
+    ({ error } = await supabase
+      .from('comments')
+      .delete()
+      .eq('page', page));
+  } else {
+    // Delete all comments
+    ({ error } = await supabase
+      .from('comments')
+      .delete()
+      .neq('id', 0)); // deletes all rows
+  }
+  if (error) {
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ message: 'Failed to reset comments' }));
+  } else {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ message: 'Comments reset' }));
+  }
+})();
       } catch (error) {
         res.statusCode = 400;
         res.setHeader('Content-Type', 'application/json');
