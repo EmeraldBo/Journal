@@ -1,3 +1,4 @@
+
 exports.handler = async function(event, context) {
   const { title, message } = JSON.parse(event.body);
 

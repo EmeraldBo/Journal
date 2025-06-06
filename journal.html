@@ -127,17 +127,21 @@
   <!-- 2) Turn.js 3 (must load second) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
   
-<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
-<script>
-  window.OneSignal = window.OneSignal || [];
-  OneSignal.push(function() {
-    OneSignal.init({
-      appId: "YOUR-ONESIGNAL-APP-ID",
-    });
-  });
-</script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
 
 <script>
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: "19ba157f-7fa3-4b2f-a73f-29b593ca82c1",
+  });
+  // This will prompt the user for notification permission
+  await OneSignal.Notifications.requestPermission();
+});
+</script>
+  
+  <script>
       $(document).ready(function () {
       // Center‐screen hint
       const isPC = window.innerWidth >= 768;
@@ -364,8 +368,21 @@ async function addComment() {
     console.log('Posted comment:', data.message);
     document.querySelector('.comment-input').value = '';
     loadComments(page);
+
+    // Send notification after successful comment post
+    const notifResponse = await fetch('/.netlify/functions/send-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'New Comment!',
+        message: 'Someone posted a new comment.'
+      })
+    });
+    const notifData = await notifResponse.json();
+    console.log('Notification sent:', notifData);
+
   } catch (error) {
-    console.error('Failed to post comment:', error);
+    console.error('Failed to post comment or send notification:', error);
   }
 }
 
