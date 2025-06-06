@@ -170,7 +170,7 @@ OneSignalDeferred.push(async function(OneSignal) {
     appId: "19ba157f-7fa3-4b2f-a73f-29b593ca82c1",
   });
   // This will prompt the user for notification permission
-  if (await OneSignal.Notifications.permisssionStatus() === 'default') {
+  if (await OneSignal.Notifications.permission === 'default') {
     await OneSignal.Notifications.requestPermission();
   }
 });
