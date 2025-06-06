@@ -126,6 +126,17 @@
   <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
   <!-- 2) Turn.js 3 (must load second) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+  
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "19ba157f-7fa3-4b2f-a73f-29b593ca82c1",
+    });
+    OneSignal.showSlidedownPrompt();
+  });
+</script>
+  
   <script>
       $(document).ready(function () {
       // Center‐screen hint
@@ -355,7 +366,16 @@ async function addComment() {
     loadComments(page);
   } catch (error) {
     console.error('Failed to post comment:', error);
+  await fetch('/.netlify/functions/send-notification', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    title: 'New Comment!',
+    message: 'Someone posted a new comment.'
+  })
+});
   }
+  
 }
 
   // Reset comments via backend (requires backend endpoint)
