@@ -122,7 +122,14 @@
     }
   </style>
 
-  <!-- Admin Notify Button (hidden by default) -->
+  <!-- 1) jQuery 1.9.1 (must load first) -->
+  <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <!-- 2) Turn.js 3 (must load second) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+  
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+    <!-- Admin Notify Button (hidden by default) -->
 <button id="notify-update-btn" style="display:block;position:fixed;bottom:20px;right:20px;z-index:9999;">🔔 Notify Users of Update</button>
 <script>
   // Hide the button by default
@@ -156,14 +163,6 @@
     }
   };
 </script>
-
-  <!-- 1) jQuery 1.9.1 (must load first) -->
-  <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
-  <!-- 2) Turn.js 3 (must load second) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
-  
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-
 
 <script>
 window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -346,6 +345,17 @@ document.body.appendChild(userNameplate);
       $('#toggle-debug').on('click', toggleDebugLog);
     });
   </script>
+
+<script>
+  // Only show debug log for debug users
+  const username = localStorage.getItem('journalUsername');
+  if (username === 'debug') {
+    document.getElementById('debug-log-wrapper').style.display = 'block';
+  } else {
+    document.getElementById('debug-log-wrapper').style.display = 'none';
+  }
+</script>
+
 <script>
   function escapeHTML(str) {
     return str.replace(/[&<>"']/g, m => ({
@@ -546,8 +556,6 @@ by ???
     </div>
     <div id="debug-log" style="background: black; color: lime; max-height: 150px; overflow-y: auto; padding: 10px; display: none; border-bottom: 2px solid lime;"></div>
   </div>
-
-  
 
   <script>
 

@@ -345,6 +345,17 @@ document.body.appendChild(userNameplate);
       $('#toggle-debug').on('click', toggleDebugLog);
     });
   </script>
+
+<script>
+  // Only show debug log for debug users
+  const username = localStorage.getItem('journalUsername');
+  if (username === 'debug') {
+    document.getElementById('debug-log-wrapper').style.display = 'block';
+  } else {
+    document.getElementById('debug-log-wrapper').style.display = 'none';
+  }
+</script>
+
 <script>
   function escapeHTML(str) {
     return str.replace(/[&<>"']/g, m => ({
