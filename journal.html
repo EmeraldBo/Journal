@@ -127,7 +127,7 @@
   <!-- 2) Turn.js 3 (must load second) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
   
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"></script>
 
     <!-- Admin Notify Button (hidden by default) -->
 <button id="notify-update-btn" style="display:block;position:fixed;bottom:20px;right:20px;z-index:9999;">🔔 Notify Users of Update</button>
@@ -169,9 +169,19 @@ OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "19ba157f-7fa3-4b2f-a73f-29b593ca82c1",
   });
-  // This will prompt the user for notification permission
-  if (await OneSignal.Notifications.permission === 'default' && await OneSignal.Notifications.Notifications.permission == 'granted') {
-    await OneSignal.Notifications.requestPermission();
+  // Prompt the user for notification permission only if not already granted or denied
+  if (OneSignal.Notifications.permission === 'default') {
+    console.log('Requesting notification permission...');
+    try {
+      const permission = await OneSignal.Notifications.requestPermission();
+      if (permission === 'granted') {
+        console.log('Notification permission granted.');
+      } else {
+        console.log('Notification permission denied.');
+      }
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+    }
   }
 });
 </script>
