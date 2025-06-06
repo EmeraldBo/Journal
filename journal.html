@@ -132,13 +132,6 @@
     <!-- Admin Notify Button (hidden by default) -->
 <button id="notify-update-btn" style="display:block;position:fixed;bottom:20px;right:20px;z-index:9999;">🔔 Notify Users of Update</button>
 <script>
-  // Hide the button by default
-  document.getElementById('notify-update-btn').style.display = 'none';
-
-  // Show only for debug users
-  if (username === 'debug') {
-    document.getElementById('notify-update-btn').style.display = 'block';
-  }
 
   document.getElementById('notify-update-btn').onclick = async function() {
     const confirmed = confirm("Send a notification to all users about the journal update?");
@@ -346,13 +339,18 @@ document.body.appendChild(userNameplate);
   </script>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
   // Only show debug log for debug users
   const username = localStorage.getItem('journalUsername');
-  if (username === 'debug') {
-    document.getElementById('debug-log-wrapper').style.display = 'block';
-  } else {
-    document.getElementById('debug-log-wrapper').style.display = 'none';
+  const debugLogWrapper = document.getElementById('debug-log-wrapper');
+  if (debugLogWrapper) {
+    if (username === 'debug') {
+      debugLogWrapper.style.display = 'block';
+    } else {
+      debugLogWrapper.style.display = 'none';
+    }
   }
+});
 </script>
 
 <script>
@@ -463,6 +461,39 @@ async function addComment() {
     btn.textContent = isVisible ? '💬 Show Comments' : '💬 Hide Comments';
   }
 </script>
+<script>
+  const username = localStorage.getItem('journalUsername') || 'Guest';
+  // Hide the button by default
+  document.getElementById('notify-update-btn').style.display = 'none';
+
+  // Show only for debug users
+  if (username === 'debug') {
+    document.getElementById('notify-update-btn').style.display = 'block';
+  }
+
+  document.getElementById('notify-update-btn').onclick = async function() {
+    const confirmed = confirm("Send a notification to all users about the journal update?");
+    if (!confirmed) return;
+    try {
+      const resp = await fetch('/.netlify/functions/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Journal Updated!',
+          message: 'The journal has just been updated. Check out the new content!'
+        })
+      });
+      if (resp.ok) {
+        alert('Notification sent!');
+      } else {
+        alert('Failed to send notification.');
+      }
+    } catch (e) {
+      alert('Error sending notification.');
+    }
+  };
+</script>
+
 </head>
 
 <body>
