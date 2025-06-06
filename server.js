@@ -7,11 +7,6 @@ const hostname = '127.0.0.1';
 const port = 8000;
 const COMMENTS_FILE = 'comments.json';
 
-const { createClient } = require('@supabase/supabase-js');
-const SUPABASE_URL = 'https://iwzzrkvbdpzkxuiyvnrh.supabase.co'; // Replace with your URL
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3enpya3ZiZHB6a3h1aXl2bnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxNjM1ODQsImV4cCI6MjA2NDczOTU4NH0.RWfvuIn-ITSGLo1MyARW6lPLSePXhVnKKSgKa9rzdY8'; // Replace with your anon key
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 // Load comments from file at startup
 let comments = {};
 try {

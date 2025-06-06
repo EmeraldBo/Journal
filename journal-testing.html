@@ -21,7 +21,7 @@
     /* Stable wrapper */
     #flipbook-wrapper {
       width: 90vw;
-      height: 60vh;
+      height: 70vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -37,7 +37,7 @@
     /* Each page is half the book width */
     #flipbook .page {
       width: 45vw;
-      height: 60vh;
+      height: 70vh;
       background: white;
       box-sizing: border-box;
       padding: 20px;
@@ -280,7 +280,7 @@
   // Load comments for a page from backend
   async function loadComments(page = 1) {
     try {
-      const response = await fetch(`http://localhost:8000/comments?page=${page}`, {
+      const response = await fetch(`/.netlify/functions/comments?page=${page}`, {
         method: 'GET',
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -300,7 +300,7 @@ async function addComment() {
   const page = $('#flipbook').turn('page') || 1;
   const user = localStorage.getItem('journalUsername') || 'User'; // <-- Get username from localStorage
   try {
-    const response = await fetch('http://localhost:8000/comments', {
+    const response = await fetch('/.netlify/functions/comments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -321,10 +321,10 @@ async function addComment() {
   // Reset comments via backend (requires backend endpoint)
   async function askPasswordAndClear() {
     const password = prompt("Enter password to reset comments:");
-    if (password === 'reset123') {
+    if (password === 'Admin123') {
       try {
         const page = $('#flipbook').turn('page') || 1;
-        const response = await fetch('http://localhost:8000/comments/reset', {
+        const response = await fetch('/.netlify/functions/comments/reset', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password, page })
