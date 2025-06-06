@@ -129,6 +129,40 @@
   
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
+    <!-- Admin Notify Button (hidden by default) -->
+<button id="notify-update-btn" style="display:block;position:fixed;bottom:20px;right:20px;z-index:9999;">🔔 Notify Users of Update</button>
+<script>
+  // Hide the button by default
+  document.getElementById('notify-update-btn').style.display = 'none';
+
+  // Show only for debug users
+  const username = localStorage.getItem('journalUsername');
+  if (username === 'debug') {
+    document.getElementById('notify-update-btn').style.display = 'block';
+  }
+
+  document.getElementById('notify-update-btn').onclick = async function() {
+    const confirmed = confirm("Send a notification to all users about the journal update?");
+    if (!confirmed) return;
+    try {
+      const resp = await fetch('/.netlify/functions/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Journal Updated!',
+          message: 'The journal has just been updated. Check out the new content!'
+        })
+      });
+      if (resp.ok) {
+        alert('Notification sent!');
+      } else {
+        alert('Failed to send notification.');
+      }
+    } catch (e) {
+      alert('Error sending notification.');
+    }
+  };
+</script>
 
 <script>
 window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -137,7 +171,9 @@ OneSignalDeferred.push(async function(OneSignal) {
     appId: "19ba157f-7fa3-4b2f-a73f-29b593ca82c1",
   });
   // This will prompt the user for notification permission
-  await OneSignal.Notifications.requestPermission();
+  if (await OneSignal.Notifications.permisssionStatus() === 'default') {
+    await OneSignal.Notifications.requestPermission();
+  }
 });
 </script>
   
