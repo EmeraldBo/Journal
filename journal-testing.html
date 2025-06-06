@@ -74,6 +74,21 @@
       z-index: 10000;
     }
 
+
+    #userNameplate {
+      position: fixed;
+      top: 10vh;
+      left: 10vw;
+      transform: translate(-50%, -50%);
+      font-size: clamp(10px, 3vw, 20px);
+      font-family: sans-serif;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 2px;
+      z-index: 10000;
+    }
+
     /* Optional style tweak for page‐number div */
     .page-number {
       font-weight: bold;
@@ -111,6 +126,31 @@
   <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
   <!-- 2) Turn.js 3 (must load second) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+  <script>
+      $(document).ready(function () {
+      // Center‐screen hint
+      const isPC = window.innerWidth >= 768;
+      const userNameplate = document.createElement('div');
+      userNameplate.id = 'userNameplate';
+userNameplate.innerHTML = 'Logged in as:<br>' + (localStorage.getItem('journalUsername') || 'Guest');
+      document.body.appendChild(userNameplate);
+
+      // Add Sign Out button
+const signOutBtn = document.createElement('button');
+signOutBtn.textContent = 'Sign Out';
+signOutBtn.style.marginTop = '8px';
+signOutBtn.onclick = function() {
+  localStorage.removeItem('journalUsername');
+  window.location.href = 'index.html';
+};
+userNameplate.appendChild(document.createElement('br'));
+userNameplate.appendChild(signOutBtn);
+
+document.body.appendChild(userNameplate);
+      });
+
+      
+  </script>
   <script>
     $(document).ready(function () {
       // Center‐screen hint
