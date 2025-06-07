@@ -131,7 +131,6 @@
 
     <!-- Admin Notify Button (hidden by default) -->
 <button id="notify-update-btn" style="display:block;position:fixed;bottom:20px;right:20px;z-index:9999;">🔔 Notify Users of Update</button>
-<button onclick="OneSignal.Notifications.requestPermission()">Test Notification Prompt</button>
 
 
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"></script>
@@ -262,8 +261,8 @@ document.body.appendChild(userNameplate);
             numberEl.className = 'page-number';
             Object.assign(numberEl.style, {
               position:     'absolute',
-              bottom:       '5px',
-              right:        '10px',
+              bottom:       '20px',
+              right:        '20px',
               fontSize:     '12px',
               color:        '#fff',
               fontFamily:   'sans-serif',
