@@ -412,6 +412,9 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+  // 1. Define the book identifier at the top
+  const book = 'journal'; // Change this to 'letter' or other for other books
+
   function escapeHTML(str) {
     return str.replace(/[&<>"']/g, m => ({
       '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
@@ -434,10 +437,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Load comments for a page from backend
+  // 2. Load comments for a page from backend (include book)
   async function loadComments(page = 1) {
     try {
-      const response = await fetch(`/.netlify/functions/comments?page=${page}`, {
+      const response = await fetch(`/.netlify/functions/comments?book=${book}&page=${page}`, {
         method: 'GET',
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -450,45 +453,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Add a comment via backend
-async function addComment() {
-  const commentText = document.querySelector('.comment-input').value.trim();
-  if (!commentText) return;
-  const page = $('#flipbook').turn('page') || 1;
-  const user = localStorage.getItem('journalUsername') || 'User'; // <-- Get username from localStorage
-  try {
-    const response = await fetch('/.netlify/functions/comments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors',
-      body: JSON.stringify({ user: user, text: escapeHTML(commentText), page })
-    });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    console.log('Posted comment:', data.message);
-    document.querySelector('.comment-input').value = '';
-    loadComments(page);
+  // 3. Add a comment via backend (include book)
+  async function addComment() {
+    const commentText = document.querySelector('.comment-input').value.trim();
+    if (!commentText) return;
+    const page = $('#flipbook').turn('page') || 1;
+    const user = localStorage.getItem('journalUsername') || 'User';
+    try {
+      const response = await fetch('/.netlify/functions/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        body: JSON.stringify({ user: user, text: escapeHTML(commentText), page, book }) // <-- include book
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      console.log('Posted comment:', data.message);
+      document.querySelector('.comment-input').value = '';
+      loadComments(page);
 
-    // Send notification after successful comment post
-    const notifResponse = await fetch('/.netlify/functions/send-notification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: 'New Comment!',
-        message: 'Someone posted a new comment.'
-      })
-    });
-    const notifData = await notifResponse.json();
-    console.log('Notification sent:', notifData);
+      // Send notification after successful comment post
+      const notifResponse = await fetch('/.netlify/functions/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New Comment!',
+          message: 'Someone posted a new comment.'
+        })
+      });
+      const notifData = await notifResponse.json();
+      console.log('Notification sent:', notifData);
 
-  } catch (error) {
-    console.error('Failed to post comment or send notification:', error);
+    } catch (error) {
+      console.error('Failed to post comment or send notification:', error);
+    }
   }
-}
 
-  // Reset comments via backend (requires backend endpoint)
+  // 4. Reset comments via backend (include book)
   async function askPasswordAndClear() {
     const password = prompt("Enter password to reset comments:");
     if (password === 'Admin123') {
@@ -497,7 +500,7 @@ async function addComment() {
         const response = await fetch('/.netlify/functions/comments/reset', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password, page })
+          body: JSON.stringify({ password, page, book }) // <-- include book
         });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         alert('Comments reset.');
@@ -509,7 +512,8 @@ async function addComment() {
       alert("Incorrect password.");
     }
   }
-  
+</script>
+  <script>
   // Toggle comments visibility
   function toggleComments() {
     const body = document.getElementById('commentBody');

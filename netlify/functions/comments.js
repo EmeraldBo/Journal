@@ -8,14 +8,16 @@ exports.handler = async (event, context) => {
 
   // /comments endpoint
 if (path.endsWith('/comments')) {
-  if (httpMethod === 'GET') {
-    const page = parseInt(queryStringParameters.page || 1, 10);
-    console.log('Querying comments for page:', page, typeof page);
-    const { data, error } = await supabase
-      .from('comments')
-      .select('*')
-      .eq('page', page)
-      .order('created_at', { ascending: true });
+if (httpMethod === 'GET') {
+  const page = parseInt(queryStringParameters.page || 1, 10);
+  const book = queryStringParameters.book || 'journal'; // default fallback
+  console.log('Querying comments for book:', book, 'page:', page);
+  const { data, error } = await supabase
+    .from('comments')
+    .select('*')
+    .eq('book', book) // <-- filter by book
+    .eq('page', page)
+    .order('created_at', { ascending: true });
     if (error) {
       return {
         statusCode: 500,
@@ -28,12 +30,11 @@ if (path.endsWith('/comments')) {
     };
   } else if (httpMethod === 'POST') {
   try {
-    const newComment = JSON.parse(body);
-    const { user, text, page } = newComment;
-    const pageInt = parseInt(page, 10);
-    const { error } = await supabase
-      .from('comments')
-      .insert([{ user, text, page: pageInt }]);
+const { user, text, page, book } = newComment;
+const pageInt = parseInt(page, 10);
+const { error } = await supabase
+  .from('comments')
+  .insert([{ user, text, page: pageInt, book }]); // <-- include book
     if (error) {
       console.error('Supabase insert error:', error);
       return {
@@ -57,26 +58,30 @@ if (path.endsWith('/comments')) {
   // /comments/reset endpoint
   if (path.endsWith('/comments/reset') && httpMethod === 'POST') {
     try {
-      const data = JSON.parse(body);
-      const { password, page } = data;
-      if (password !== 'Admin123') {
-        return {
-          statusCode: 403,
-          body: JSON.stringify({ message: 'Incorrect password' }),
-        };
-      }
-      let error;
-      if (page) {
-        ({ error } = await supabase
-          .from('comments')
-          .delete()
-          .eq('page', page));
-      } else {
-        ({ error } = await supabase
-          .from('comments')
-          .delete()
-          .neq('id', 0));
-      }
+      // ...existing code...
+const { password, page, book } = data;
+if (password !== 'Admin123') {
+  // ...existing code...
+}
+let error;
+if (page && book) {
+  ({ error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('page', page)
+    .eq('book', book)); // <-- filter by book
+} else if (book) {
+  ({ error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('book', book)); // <-- delete all for book
+} else {
+  ({ error } = await supabase
+    .from('comments')
+    .delete()
+    .neq('id', 0));
+}
+// ...existing code...
       if (error) {
         return {
           statusCode: 500,
