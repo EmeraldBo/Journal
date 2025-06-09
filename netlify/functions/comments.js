@@ -30,6 +30,7 @@ if (httpMethod === 'GET') {
     };
   } else if (httpMethod === 'POST') {
   try {
+    const newComment = JSON.parse(body); // <--- Make sure this line exists
 const { user, text, page, book } = newComment;
 const pageInt = parseInt(page, 10);
 const { error } = await supabase
