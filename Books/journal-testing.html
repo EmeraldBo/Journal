@@ -508,7 +508,7 @@ async function addComment() {
 
 <body>
 
-  <!-- Extras Menu -->
+<!-- Extras Menu -->
 <div id="extra-books" style="position: fixed; bottom: 55px; left: 10px; z-index: 1000;">
   <div id="extraBody" class="extras-body" style="display: none;">
     <h4>Extras</h4>
@@ -518,23 +518,22 @@ async function addComment() {
   </div>
 </div>
 
-  <!-- Comments -->
-  <div class="comment-section">
-
-    <div id="commentBody" class="comments-body" style="display: none;">
-    
+<!-- Comments -->
+<div class="comment-section" style="position: fixed; bottom: 55px; left: 10px; z-index: 1000;">
+  <div id="commentBody" class="comments-body" style="display: none;">
     <h4>Comments</h4>
     <div class="comments-container"></div>
     <textarea class="comment-input" placeholder="Write a comment..."></textarea>
     <button onclick="askPasswordAndClear()">Reset Comments</button>
     <button class="submit-comment">Post Comment</button>
-    </div>
   </div>
-  
-  <div style="display: grid; gap: 10px; align-items: center; position: fixed; bottom: 10px; left: 10px; z-index: 1000;">
-    <button class="collapse-btn" onclick="toggleComments()">💬 Toggle Comments</button>
-    <button class="collapse-btn-extras" onclick="toggleExtras()">📚 Toggle Extras</button>
-  </div>
+</div>
+
+<!-- Toggle Buttons -->
+<div style="display: flex; gap: 10px; align-items: center; position: fixed; bottom: 10px; left: 10px; z-index: 1000;">
+  <button class="collapse-btn" onclick="toggleComments()">💬 Toggle Comments</button>
+  <button class="collapse-btn-extras" onclick="toggleExtras()">📚 Toggle Extras</button>
+</div>
 
   <div id="flipbook-wrapper">
     <div id="flipbook">
