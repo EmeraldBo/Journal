@@ -30,12 +30,18 @@ if (httpMethod === 'GET') {
     };
   } else if (httpMethod === 'POST') {
   try {
-    const newComment = JSON.parse(body); // <--- Make sure this line exists
-const { user, text, page, book } = newComment;
-const pageInt = parseInt(page, 10);
-const { error } = await supabase
-  .from('comments')
-  .insert([{ user, text, page: pageInt, book }]); // <-- include book
+    const newComment = JSON.parse(body);
+    const { user, text, page, book } = newComment;
+    if (!user || !text || !page || !book) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Missing required fields' }),
+      };
+    }
+    const pageInt = parseInt(page, 10);
+    const { error } = await supabase
+      .from('comments')
+      .insert([{ user, text, page: pageInt, book }]);
     if (error) {
       console.error('Supabase insert error:', error);
       return {
@@ -53,7 +59,7 @@ const { error } = await supabase
       body: JSON.stringify({ message: 'Invalid JSON in request body', error: error.message }),
     };
   }
-    }
+}
   }
 
   // /comments/reset endpoint
