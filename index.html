@@ -35,10 +35,10 @@
 
     if (matchFound) {
       localStorage.setItem('journalUsername', userName);
-      window.location.href = "journal.html";
+      window.location.href = "Books/journal.html";
     } else if (debugAcc[0][0] === userName && debugAcc[0][1] === userPass) {
       localStorage.setItem('journalUsername', userName);
-      window.location.href = "journal-testing.html";
+      window.location.href = "Books/journal-testing.html";
     } else {
       document.getElementById('errorMsg').textContent = "Incorrect username or password.";
     }
@@ -51,9 +51,9 @@
     const savedUser = localStorage.getItem('journalUsername');
     if (savedUser) {
       if (savedUser === 'debug') {
-        window.location.href = "journal-testing.html";
+        window.location.href = "Books/journal-testing.html";
       } else {
-        window.location.href = "journal.html";
+        window.location.href = "Books/journal.html";
       }
     }
   };
