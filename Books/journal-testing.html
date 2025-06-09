@@ -148,8 +148,31 @@
       font-size: 14px;
       border-radius: 4px;
     }
+  .toggle-buttons-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1000;
+    flex-direction: row; /* Default: side by side */
+  }
+
+  @media (max-width: 767px) {
+    .toggle-buttons-row {
+      flex-direction: column; /* Stack vertically on mobile */
+      left: 10px;
+      right: 10px;
+      width: auto;
+      align-items: flex-start;
+    }
+  }
   </style>
-  <script> const username = localStorage.getItem('journalUsername');</script>
+  <script> 
+  const username = localStorage.getItem('journalUsername');
+  const isPC = window.innerWidth >= 768;
+  </script>
   <!-- 1) jQuery 1.9.1 (must load first) -->
   <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
   <!-- 2) Turn.js 3 (must load second) -->
@@ -212,7 +235,6 @@ if (!username) {
   <script>
       $(document).ready(function () {
       // Center‐screen hint
-      const isPC = window.innerWidth >= 768;
       const userNameplate = document.createElement('div');
       userNameplate.id = 'userNameplate';
 userNameplate.innerHTML = 'Logged in as:<br>' + (localStorage.getItem('journalUsername') || 'Guest');
@@ -486,7 +508,7 @@ async function addComment() {
       alert("Incorrect password.");
     }
   }
-
+  
   // Toggle comments visibility
   function toggleComments() {
     const body = document.getElementById('commentBody');
@@ -530,7 +552,7 @@ async function addComment() {
 </div>
 
 <!-- Toggle Buttons -->
-<div style="display: flex; gap: 10px; align-items: center; position: fixed; bottom: 10px; left: 10px; z-index: 1000;">
+<div class="toggle-buttons-row">
   <button class="collapse-btn" onclick="toggleComments()">💬 Toggle Comments</button>
   <button class="collapse-btn-extras" onclick="toggleExtras()">📚 Toggle Extras</button>
 </div>
