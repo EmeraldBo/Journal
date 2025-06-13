@@ -43,7 +43,7 @@
       padding: 20px;
       overflow: hidden;
       font-family: serif;
-      font-size: clamp(14px, 2vw, 18px);
+      font-size: clamp(10px, 1vw, 12px);
       line-height: 1.4;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
       position: relative;
@@ -129,23 +129,17 @@
       font-size: 14px;
       border-radius: 4px;
     }
-    .extras-container {
+    .extraBody {
       position: fixed;
       bottom: 55px;
       left: 10px;
       right: 10px;
       width: 100%;
-      background: #f0f0f0;
       font-size: 12px;
+      background: #f0f0f0;
       z-index: 1000;
       font-family: sans-serif;
     }
-.extras-body {
-  background: #f0f0f0; /* Example: light yellow background */
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-  padding: 12px;
-}
     .collapse-btn-extras {
       background: #28a745;
       color: white;
@@ -193,10 +187,7 @@
 <script>
 // filepath: c:\Users\sacha\Desktop\Journal\Books\journal-testing.html
 if (!username) {
-  window.location.href = "../index.html";
-}
-if (username == 'public') {
-  window.location.href = "../Books/Fractured-Horizons/V1/frachorizons.html";
+  window.location.href = "../../../index.html";
 }
 </script>
 
@@ -256,7 +247,7 @@ signOutBtn.textContent = 'Sign Out';
 signOutBtn.style.marginTop = '8px';
 signOutBtn.onclick = function() {
   localStorage.removeItem('journalUsername');
-  window.location.href = '../index.html';
+  window.location.href = '../../../index.html';
 };
 userNameplate.appendChild(document.createElement('br'));
 userNameplate.appendChild(signOutBtn);
@@ -422,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
   // 1. Define the book identifier at the top
-  const book = 'journal'; // Change this to 'letter' or other for other books
+  const book = 'FHV1'; // Change this to 'letter' or other for other books
 
   function escapeHTML(str) {
     return str.replace(/[&<>"']/g, m => ({
@@ -549,10 +540,8 @@ document.addEventListener('DOMContentLoaded', function() {
   <div id="extraBody" class="extras-body" style="display: none;">
     <h4>Extras</h4>
     <ul>
-      Journals:
-      <li><a href="../Books/journal.html">Timeless Journal</a></li>
-      Special Messages:
-      <li><a href="../Books/letter.html">Memoryless Letter</a></li>
+      The Fractured Horizons:
+      <li><a href="../../../Books/Fractured-Horizons/V1/frachorizons.html">Volume 1</a></li>
     </ul>
   </div>
 </div>
@@ -577,58 +566,20 @@ document.addEventListener('DOMContentLoaded', function() {
   <div id="flipbook-wrapper">
     <div id="flipbook">
       <!-- Page 1 (static) -->
-      <div class="page">
-        <pre>
-Timeless Journal
-        
-by ???
-        </pre>
-        <img src="../doodles/doodle-title.jpg" alt="Timeless Journal title doodle">
-      </div>
       
       <!-- Opening Pages (static) -->
-      <div class="page" data-src="../Pages/Opening.html"></div>
-      <div class="page" data-src="../Pages/Updates.html"></div>
-
-
-      <!-- Page 2 (dynamic) -->
-      <div class="page" data-src="../Pages/20XX/page1.html"></div>
-
-      <!-- 2024 -->
-      <div class="page" data-src="../Pages/2024/page1.html"></div>
-      <div class="page" data-src="../Pages/2024/page2.html"></div>
-      <div class="page" data-src="../Pages/2024/page3.html"></div>
-
-      <!-- January 2025 -->
-      <div class="page" data-src="../Pages/2025/January/page1.html"></div>
-      <div class="page" data-src="../Pages/2025/January/page2.html"></div>
-      <div class="page" data-src="../Pages/2025/January/page3.html"></div>
-
-      <!-- February 2025 -->
-      <div class="page" data-src="../Pages/2025/February/page1.html"></div>
-
-      <!-- March 2025 -->
-      <div class="page" data-src="../Pages/2025/March/page1.html"></div>
-      <div class="page" data-src="../Pages/2025/March/page2.html"></div>
-
-      <!-- April 2025 -->
-      <div class="page" data-src="../Pages/2025/April/page1.html"></div>
-      <div class="page" data-src="../Pages/2025/April/page2.html"></div>
-
-      <!-- May 2025 -->
-      <div class="page" data-src="../Pages/2025/May/page1.html"></div>
-      <div class="page" data-src="../Pages/2025/May/page2.html"></div>
-      <div class="page" data-src="../Pages/2025/May/page3.html"></div>
-      <div class="page" data-src="../Pages/2025/May/page4.html"></div>
-
-      <!-- June 2025 -->
-      <div class="page" data-src="../Pages/2025/June/page1.html"></div>
-      <div class="page" data-src="../Pages/2025/June/page2.html"></div>
-      <div class="page" data-src="../Pages/2025/June/page3.html"></div>
-      <div class="page" data-src="../Pages/2025/June/page4.html"></div>
-      <div class="page" data-src="../Pages/2025/June/page5.html"></div>
-      <div class="page" data-src="../Pages/2025/June/page6.html"></div>
-      <div class="page" data-src="../Pages/2025/June/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/Opening.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/Opening-2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/TOC.html"></div>
+      
+      <!-- Chapter 1 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page7.html"></div>
     </div> <!-- /#flipbook -->
   </div> <!-- /#flipbook-wrapper -->
 

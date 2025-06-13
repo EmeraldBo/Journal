@@ -20,6 +20,7 @@
     event.preventDefault();
     const registeredAccounts = [["qief", 'password'], ["yannah", 'password'], ["danielle", '072319'], ["umairah", 'SomethingAboutStrawberry'], ["carlo", 'MoneyGah']];
     const debugAcc = [['debug', 'DEBUG-LOVELESSDIARY']];
+    const publicAcc = [['public', '']];
     const userName = document.getElementById('username').value.trim().toLowerCase();
     const userPass = document.getElementById('password').value.trim();
 
@@ -39,6 +40,9 @@
     } else if (debugAcc[0][0] === userName && debugAcc[0][1] === userPass) {
       localStorage.setItem('journalUsername', userName);
       window.location.href = "Books/journal-testing.html";
+    } else if (publicAcc[0][0] === userName && publicAcc[0][1] === userPass) {
+      localStorage.setItem('journalUsername', userName);
+      window.location.href = "Books/Fractured-Horizons/V1/frachorizons.html";
     } else {
       document.getElementById('errorMsg').textContent = "Incorrect username or password.";
     }
