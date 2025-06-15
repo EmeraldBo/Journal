@@ -43,7 +43,7 @@
       padding: 20px;
       overflow: hidden;
       font-family: serif;
-      font-size: clamp(12px, 2vw, 16px);
+      font-size: clamp(12px, 2vw, 15.5px);
       line-height: 1.4;
       color:rgb(0, 0, 0);
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
@@ -432,8 +432,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const book = 'FHV1'; // Change this to 'letter' or other for other books
 
   function escapeHTML(str) {
-    return str.replace(/[&<>"']/g, m => ({
-      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    return str.replace(/[&<>"=]/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'
     }[m]));
   }
 
@@ -604,6 +604,24 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="page" data-src="../../../PagesFH/Volume-1/C1/page13.html"></div>
       <div class="page" data-src="../../../PagesFH/Volume-1/C1/page14.html"></div>
       <div class="page" data-src="../../../PagesFH/Volume-1/C1/page15.html"></div>
+      
+      <div class="page" data-src="../../../PagesFH/Volume-1/CharIntros/C1-1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/CharIntros/C1-2.html"></div>
+
+      <!-- Chapter 2 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page10.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page11.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page12.html"></div>
+
 
     </div> <!-- /#flipbook -->
   </div> <!-- /#flipbook-wrapper -->
