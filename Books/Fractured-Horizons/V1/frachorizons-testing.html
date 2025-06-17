@@ -76,24 +76,19 @@
     }
 
 
-#userNameplate {
-  position: fixed;
-  top: 50px;
-  left: 50px;
-  right: auto;
-  bottom: auto;
-  transform: none;
-  font-size: clamp(10px, 3vw, 20px);
-  font-family: sans-serif;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 2px;
-  z-index: 10000;
-  min-width: 120px;
-  max-width: 90vw;
-  text-align: left;
-}
+    #userNameplate {
+      position: fixed;
+      top: 10vh;
+      left: 10vw;
+      transform: translate(-50%, -50%);
+      font-size: clamp(10px, 3vw, 20px);
+      font-family: sans-serif;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 2px;
+      z-index: 10000;
+    }
 
     /* Optional style tweak for page‐number div */
     .page-number {
@@ -174,29 +169,6 @@
       width: auto;
       align-items: flex-start;
     }
-  #userNameplate {
-    top: auto;
-    left: auto;
-    bottom: 10px;
-    right: 10px;
-    font-size: 14px;
-    padding: 4px 6px;
-    min-width: 100px;
-    max-width: 90vw;
-    text-align: right;
-  }
-  #centerText {
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    width: 50vw;
-    max-width: calc(100vw - 20px);
-    font-size: 13px;
-    padding: 4px 6px;
-    min-width: 100px;
-    text-align: left;
-    transform: none;
-  }
   }
 
   body.dark-mode {
@@ -262,8 +234,8 @@ function toggleDarkMode() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: 'The Fractured Horizons Updated!',
-          message: 'The Fractured Horizons has just been updated. Check out the new chapters and content!'
+          title: 'Journal Updated!',
+          message: 'The journal has just been updated. Check out the new content!'
         })
       });
       if (resp.ok) {
@@ -328,6 +300,23 @@ document.body.appendChild(userNameplate);
       if (pageCount < 2) {
         console.warn('⚠️ At least 2 pages are needed for flipping to work.');
       }
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('../../../PagesFH/Volume-1/C1/all-pages.html')
+    .then(res => res.text())
+    .then(html => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const bookPages = tempDiv.querySelectorAll('.page-content');
+      const flipbookPages = document.querySelectorAll('#flipbook .page');
+      // Fill each flipbook page with the corresponding book-page content
+      flipbookPages.forEach((flipPage, i) => {
+        if (bookPages[i]) {
+          flipPage.innerHTML = bookPages[i].innerHTML;
+        }
+      });
+
+      // Initialize Turn.js ONLY after pages are loaded
+      const isPC = window.innerWidth >= 768;
       $('#flipbook').turn({
         width:      isPC ? 400  : window.innerWidth * 0.9,
         height:     isPC ? 600  : window.innerHeight * 0.8,
@@ -341,6 +330,8 @@ document.body.appendChild(userNameplate);
           }
         }
       });
+    });
+});
 
       // Preload first pages and add page numbers
       pages.each(function(index) {
@@ -607,66 +598,6 @@ document.addEventListener('DOMContentLoaded', function() {
   <button class="collapse-btn-extras" onclick="toggleExtras()">📚 Toggle Extras</button>
 </div>
 
-  <div id="flipbook-wrapper">
-    <div id="flipbook">
-      
-      <!-- Opening Pages (static) -->
-      <div class="page"><img src="../../../PagesFH/Volume-1/Cover.png"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/Opening.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/Opening-2.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/TOC.html"></div>
-      
-      <!-- Chapter 1 -->
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page1.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page2.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page3.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page4.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page5.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page6.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page7.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page8.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page9.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page10.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page11.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page12.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page13.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page14.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page15.html"></div>
-      <div class="page"><img src="../../../PagesFH/Volume-1/C1/deaths.png"></div>
-      
-      <div class="page" data-src="../../../PagesFH/Volume-1/CharIntros/C1-1.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/CharIntros/C1-2.html"></div>
-
-      <!-- Chapter 2 -->
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page1.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page2.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page3.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page4.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page5.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page6.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page7.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page8.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page9.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page10.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page11.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page12.html"></div>
-
-      <!-- Chapter 3 -->
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page1.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page2.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page3.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page4.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page5.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page6.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page7.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page8.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page9.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page10.html"></div>
-      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page11.html"></div>
-
-    </div> <!-- /#flipbook -->
-  </div> <!-- /#flipbook-wrapper -->
-
   <!-- Collapsible Debug Log -->
   <div id="debug-log-wrapper" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; font-family: monospace; font-size: 12px;">
     <div id="toggle-debug" style="background: #222; color: #0f0; padding: 5px 10px; cursor: pointer;">
@@ -685,6 +616,25 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       location.reload();
     }
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+  fetch('../../../PagesFH/Volume-1/C1/all-pages.html')
+    .then(res => res.text())
+    .then(html => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const bookPages = tempDiv.querySelectorAll('.page-content');
+      const flipbookPages = document.querySelectorAll('#flipbook .page');
+      // Fill each flipbook page with the corresponding book-page content
+      flipbookPages.forEach((flipPage, i) => {
+        if (bookPages[i]) {
+          flipPage.innerHTML = bookPages[i].innerHTML;
+        }
+      });
+    });
+});
   </script>
 </body>
 </html>
