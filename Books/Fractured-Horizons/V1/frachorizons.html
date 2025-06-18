@@ -72,7 +72,7 @@
       color: rgb(255, 255, 255);
       padding: 5px 10px;
       border-radius: 5px;
-      z-index: 10000;
+      z-index: 9999;
     }
 
 
@@ -89,7 +89,7 @@
   color: white;
   padding: 5px 10px;
   border-radius: 2px;
-  z-index: 10000;
+  z-index: 9999;
   min-width: 120px;
   max-width: 90vw;
   text-align: left;
@@ -123,8 +123,10 @@
       resize: none;
     }
     .submit-comment {
+      position: relative;
       margin-top: 4px;
       float: right;
+      z-index: 10000;
     }
     .collapse-btn {
       background: #007bff;
@@ -203,7 +205,7 @@
     background: #181818;
     color: #f0f0f0;
   }
-  body.dark-mode .page,
+  body.dark-mode #flipbook .page,
   body.dark-mode .extras-body,
   body.dark-mode .comments-body {
     background: #232323;
@@ -575,6 +577,12 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.textContent = isVisible ? '📚 Extras' : '📚 Hide Extras';
   }
 </script>
+
+<script>
+  const isDebug = localStorage.getItem("journalUsername", "debug");
+  const btn = div.getElementById("reset-comments-button");
+  btn.style.display = isDebug ? "none" : "block"
+</script>
 </head>
 
 <body>
@@ -591,12 +599,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- Comments -->
-<div class="comment-section" style="position: fixed; bottom: 65px; left: 10px; z-index: 1000;">
+<div class="comment-section" style="position: fixed; bottom: 65px; left: 10px; z-index: 10000;">
   <div id="commentBody" class="comments-body" style="display: none;">
     <h4>Comments</h4>
     <div class="comments-container"></div>
     <textarea class="comment-input" placeholder="Write a comment..."></textarea>
-    <button onclick="askPasswordAndClear()">Reset Comments</button>
+    <button onclick="askPasswordAndClear()" id="reset-comments-button" style="display: none">Reset Comments</button>
     <button class="submit-comment">Post Comment</button>
   </div>
 </div>
