@@ -79,68 +79,20 @@
   }
 </style>
 <script>
-  function checkAnswer(event) {
-    event.preventDefault();
-    const registeredAccounts = [["qief", 'password'], ["yannah", 'password'], ["danielle", '072319'], ["umairah", 'SomethingAboutStrawberry'], ["carlo", 'MoneyGah']];
-    const debugAcc = [['debug', 'DEBUG-LOVELESSDIARY']];
-    const publicAcc = [['public', '']];
-    const userName = document.getElementById('username').value.trim().toLowerCase();
-    const userPass = document.getElementById('password').value.trim();
-
-    let matchFound = false;
-
-    for (let i = 0; i < registeredAccounts.length; i++) {
-      const account = registeredAccounts[i];
-      if (account[0] === userName && account[1] === userPass) {
-        matchFound = true;
-        break;
-      }
-    }
-
-    if (matchFound) {
-      localStorage.setItem('journalUsername', userName);
-      window.location.href = "Books/journal.html";
-    } else if (debugAcc[0][0] === userName && debugAcc[0][1] === userPass) {
-      localStorage.setItem('journalUsername', userName);
-      window.location.href = "Books/journal-testing.html";
-    } else {
-      document.getElementById('errorMsg').textContent = "Incorrect username or password.";
-    }
-  }
-
-
  function onClickFHEntry() {
   localStorage.setItem('journalUsername', 'public');
   window.location.href = "Books/Fractured-Horizons/V1/frachorizons.html"; 
  }
+  function onClickTJEntry() {
+  localStorage.setItem('journalUsername', 'public');
+  window.location.href = "TJLogin.html"; 
+ }
 </script>
-
-<script>
-  // Automatic login check
-  window.onload = function() {
-    const savedUser = localStorage.getItem('journalUsername');
-    if (savedUser) {
-      if (savedUser === 'debug') {
-        window.location.href = "Books/journal-testing.html";
-      } else {
-        window.location.href = "Books/journal.html";
-      }
-    }
-  };
-</script>
-
-
   <li>Public Books</li>
   <button id="FHEntry" onclick="onClickFHEntry()">Fractured Horizons</button>
-
+  <li>Private Books (For Registered Accounts Only)</li>
+  <button id="TJEntry" onclick="onClickTJEntry()">Timeless Journal</button>
 </head>
 <body>
-  <h2>Login to ???</h2>
-  <form onsubmit="checkAnswer(event)">
-    <input type="text" autocomplete="username" id="username" placeholder="Username" />
-    <input type="password" autocomplete="current-password" id="password" placeholder="Password" />
-    <button type="submit">Submit</button>
-  </form>
-  <div id="errorMsg" class="error"></div>
 </body>
 </html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+
+<style>
+  body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-size: 1.2vw; /* base for large screens */
+      background: #f0f0f0;
+      padding: 1em;
+  }
+
+  input, button {
+      font-size: 1em;
+      padding: 0.5em 1em;
+      margin: 0.5em;
+  }
+
+  h2 {
+      margin-bottom: 1em;
+      font-size: 2em;
+  }
+
+  .error {
+      color: red;
+      margin-top: 1em;
+  }
+
+  /* Smartphones */
+  @media (max-width: 600px) {
+    body {
+        font-size: 5.5vw;
+    }
+
+    input, button {
+        font-size: 1.3em;
+        padding: 1em;
+    }
+
+    h2 {
+        font-size: 2.2em;
+    }
+  }
+
+  /* Tablets */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    body {
+        font-size: 2.5vw;
+    }
+
+    input, button {
+        font-size: 1.2em;
+        padding: 0.75em 1.25em;
+    }
+
+    h2 {
+        font-size: 2.4em;
+    }
+  }
+
+  /* Large screens (desktops/laptops) */
+  @media (min-width: 1025px) {
+    body {
+        font-size: 1.2vw;
+    }
+
+    input, button {
+        font-size: 1em;
+    }
+
+    h2 {
+        font-size: 2em;
+    }
+  }
+</style>
+<script>
+  function checkAnswer(event) {
+    event.preventDefault();
+    const registeredAccounts = [["qief", 'password'], ["yannah", 'password'], ["danielle", '072319'], ["umairah", 'SomethingAboutStrawberry'], ["carlo", 'MoneyGah']];
+    const debugAcc = [['debug', 'DEBUG-LOVELESSDIARY']];
+    const publicAcc = [['public', '']];
+    const userName = document.getElementById('username').value.trim().toLowerCase();
+    const userPass = document.getElementById('password').value.trim();
+
+    let matchFound = false;
+
+    for (let i = 0; i < registeredAccounts.length; i++) {
+      const account = registeredAccounts[i];
+      if (account[0] === userName && account[1] === userPass) {
+        matchFound = true;
+        break;
+      }
+    }
+
+    if (matchFound) {
+      localStorage.setItem('journalUsername', userName);
+      window.location.href = "Books/journal.html";
+    } else if (debugAcc[0][0] === userName && debugAcc[0][1] === userPass) {
+      localStorage.setItem('journalUsername', userName);
+      window.location.href = "Books/journal-testing.html";
+    } else {
+      document.getElementById('errorMsg').textContent = "Incorrect username or password.";
+    }
+  }
+</script>
+
+<script>
+  function returnButton() {
+    window.location.href = "index.html"
+  }
+</script>
+
+<script>
+//  // Automatic login check
+//  window.onload = function() {
+//    const savedUser = localStorage.getItem('journalUsername');
+//    if (savedUser) {
+//      if (savedUser === 'debug') {
+//       window.location.href = "Books/journal-testing.html";
+//      } else {
+//      window.location.href = "Books/journal.html";
+//     }
+//    }
+//  };
+</script>
+
+</head>
+<body>
+  <h2>Login to ???</h2>
+  <form onsubmit="checkAnswer(event)">
+    <input type="text" autocomplete="username" id="username" placeholder="Username" />
+    <input type="password" autocomplete="current-password" id="password" placeholder="Password" />
+    <button type="submit">Submit</button>
+  </form>
+  <div id="errorMsg" class="error"></div>
+
+  <button onclick="returnButton()">Back</button>
+</body>
+</html>
+
