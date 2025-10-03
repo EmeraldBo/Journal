@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>The Fractured Horizons</title>
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
@@ -72,23 +72,28 @@
       color: rgb(255, 255, 255);
       padding: 5px 10px;
       border-radius: 5px;
-      z-index: 10000;
+      z-index: 9999;
     }
 
 
-    #userNameplate {
-      position: fixed;
-      top: 10vh;
-      left: 10vw;
-      transform: translate(-50%, -50%);
-      font-size: clamp(10px, 3vw, 20px);
-      font-family: sans-serif;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 2px;
-      z-index: 10000;
-    }
+#userNameplate {
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  right: auto;
+  bottom: auto;
+  transform: none;
+  font-size: clamp(10px, 3vw, 20px);
+  font-family: sans-serif;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 2px;
+  z-index: 9999;
+  min-width: 120px;
+  max-width: 90vw;
+  text-align: left;
+}
 
     /* Optional style tweak for page‐number div */
     .page-number {
@@ -118,8 +123,10 @@
       resize: none;
     }
     .submit-comment {
+      position: relative;
       margin-top: 4px;
       float: right;
+      z-index: 10000;
     }
     .collapse-btn {
       background: #007bff;
@@ -169,13 +176,36 @@
       width: auto;
       align-items: flex-start;
     }
+  #userNameplate {
+    top: auto;
+    left: auto;
+    bottom: 10px;
+    right: 10px;
+    font-size: 14px;
+    padding: 4px 6px;
+    min-width: 100px;
+    max-width: 90vw;
+    text-align: right;
+  }
+  #centerText {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: 50vw;
+    max-width: calc(100vw - 20px);
+    font-size: 13px;
+    padding: 4px 6px;
+    min-width: 100px;
+    text-align: left;
+    transform: none;
+  }
   }
 
   body.dark-mode {
     background: #181818;
     color: #f0f0f0;
   }
-  body.dark-mode .page,
+  body.dark-mode #flipbook .page,
   body.dark-mode .extras-body,
   body.dark-mode .comments-body {
     background: #232323;
@@ -234,8 +264,8 @@ function toggleDarkMode() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: 'Journal Updated!',
-          message: 'The journal has just been updated. Check out the new content!'
+          title: 'The Fractured Horizons Updated!',
+          message: 'The Fractured Horizons has just been updated. Check out the new chapters and content!'
         })
       });
       if (resp.ok) {
@@ -300,23 +330,6 @@ document.body.appendChild(userNameplate);
       if (pageCount < 2) {
         console.warn('⚠️ At least 2 pages are needed for flipping to work.');
       }
-document.addEventListener('DOMContentLoaded', function() {
-  fetch('../../../PagesFH/Volume-1/C1/all-pages.html')
-    .then(res => res.text())
-    .then(html => {
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = html;
-      const bookPages = tempDiv.querySelectorAll('.page-content');
-      const flipbookPages = document.querySelectorAll('#flipbook .page');
-      // Fill each flipbook page with the corresponding book-page content
-      flipbookPages.forEach((flipPage, i) => {
-        if (bookPages[i]) {
-          flipPage.innerHTML = bookPages[i].innerHTML;
-        }
-      });
-
-      // Initialize Turn.js ONLY after pages are loaded
-      const isPC = window.innerWidth >= 768;
       $('#flipbook').turn({
         width:      isPC ? 400  : window.innerWidth * 0.9,
         height:     isPC ? 600  : window.innerHeight * 0.8,
@@ -330,8 +343,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
       });
-    });
-});
 
       // Preload first pages and add page numbers
       pages.each(function(index) {
@@ -370,10 +381,10 @@ document.addEventListener('DOMContentLoaded', function() {
           numberEl.className = 'page-number';
           Object.assign(numberEl.style, {
             position:     'absolute',
-            bottom:       '5px',
-            right:        '10px',
+            bottom:       '20px',
+            right:        '20px',
             fontSize:     '12px',
-            color:        '#fff',
+            color:        'gray',
             fontFamily:   'sans-serif',
             pointerEvents:'none'
           });
@@ -489,42 +500,51 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // 3. Add a comment via backend (include book)
-  async function addComment() {
-    const commentText = document.querySelector('.comment-input').value.trim();
-    if (!commentText) return;
-    const page = $('#flipbook').turn('page') || 1;
-    const user = localStorage.getItem('journalUsername') || 'User';
-    try {
-      const response = await fetch('/.netlify/functions/comments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
-        body: JSON.stringify({ user: user, text: escapeHTML(commentText), page, book }) // <-- include book
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      console.log('Posted comment:', data.message);
-      document.querySelector('.comment-input').value = '';
-      loadComments(page);
+async function addComment() {
+  const commentText = document.querySelector('.comment-input').value.trim();
+  if (!commentText) return;
 
-      // Send notification after successful comment post
-      const notifResponse = await fetch('/.netlify/functions/send-notification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: 'New Comment!',
-          message: 'Someone posted a new comment.'
-        })
-      });
-      const notifData = await notifResponse.json();
-      console.log('Notification sent:', notifData);
+  const page = $('#flipbook').turn('page') || 1;
+  const nameInput = document.getElementById('username-input');
+  let user = nameInput?.value?.trim() || 'Public';
 
-    } catch (error) {
-      console.error('Failed to post comment or send notification:', error);
-    }
+  try {
+    const response = await fetch('/.netlify/functions/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+      body: JSON.stringify({ user: user, text: escapeHTML(commentText), page, book })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+    console.log('Posted comment:', data.message);
+
+    // ✅ Clear comment and name input fields
+    document.querySelector('.comment-input').value = '';
+    document.getElementById('username-input').value = '';
+
+    // Reload comments
+    loadComments(page);
+
+    // Optional: send notification
+    await fetch('/.netlify/functions/send-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'New Comment!',
+        message: 'Someone posted a new comment.'
+      })
+    });
+
+  } catch (error) {
+    console.error('Failed to post comment or send notification:', error);
   }
+}
+
 
   // 4. Reset comments via backend (include book)
   async function askPasswordAndClear() {
@@ -566,6 +586,12 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.textContent = isVisible ? '📚 Extras' : '📚 Hide Extras';
   }
 </script>
+
+<script>
+  const isDebug = localStorage.getItem("journalUsername", "debug");
+  const btn = document.getElementById("reset-comments-button");
+  btn.style.display = isDebug ? "none" : "block"
+</script>
 </head>
 
 <body>
@@ -576,18 +602,22 @@ document.addEventListener('DOMContentLoaded', function() {
     <h4>Extras</h4>
     <ul>
       The Fractured Horizons:
-      <li><a href="../../../Books/Fractured-Horizons/V1/frachorizons.html">Volume 1</a></li>
+      <li><a href="../../../Books/Fractured-Horizons/V1/FH-Main.html">Volume 1</a></li>
+
+      The Fractured Horizons, Interversal Nexus:
+      <li><a href="../../../Books/FH-Interversal-Nexus/V1/FH-IN.html">The Golden Lily</a></li>
     </ul>
   </div>
 </div>
 
 <!-- Comments -->
-<div class="comment-section" style="position: fixed; bottom: 65px; left: 10px; z-index: 1000;">
+<div class="comment-section" style="position: fixed; bottom: 65px; left: 10px; z-index: 10000;">
   <div id="commentBody" class="comments-body" style="display: none;">
     <h4>Comments</h4>
     <div class="comments-container"></div>
     <textarea class="comment-input" placeholder="Write a comment..."></textarea>
-    <button onclick="askPasswordAndClear()">Reset Comments</button>
+    Enter your name (Optional): <input type="text" id="username-input" placeholder="public" style="width: 100%; margin-bottom: 5px;" />
+    <button onclick="askPasswordAndClear()" id="reset-comments-button" style="display: none">Reset Comments</button>
     <button class="submit-comment">Post Comment</button>
   </div>
 </div>
@@ -597,6 +627,124 @@ document.addEventListener('DOMContentLoaded', function() {
   <button class="collapse-btn" onclick="toggleComments()">💬 Toggle Comments</button>
   <button class="collapse-btn-extras" onclick="toggleExtras()">📚 Toggle Extras</button>
 </div>
+
+  <div id="flipbook-wrapper">
+    <div id="flipbook">
+
+      <!-- Opening Pages (static) -->
+      <div class="page"><img src="../../../PagesFH/Volume-1/Cover.png"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/Opening.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/Opening-2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/TOC.html"></div>
+      
+      <!-- Chapter 1 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page10.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page11.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page12.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page13.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page14.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/page15.html"></div>
+      <div class="page"><img src="../../../PagesFH/Volume-1/C1/deaths.png"></div>
+      
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/CharIntros/C1-1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C1/CharIntros/C1-2.html"></div>
+
+      <!-- Chapter 2 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page10.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page11.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C2/page12.html"></div>
+      <div class="page"><img src="../../../PagesFH/Volume-1/C2/FH V1 Ch2 Cover.png"></div>
+
+      <!-- Chapter 3 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page10.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C3/page11.html"></div>
+      <div class="page"><img src="../../../PagesFH/Volume-1/C3/FH V1 CH3 cover.png"></div>
+      
+      <!-- Chapter 4 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/page10.html"></div>
+      <div class="page"><img src="../../../PagesFH/Volume-1/C4/FH V1 CH4 cover.png"></div>
+
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/CharIntros/C4-1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C4/CharIntros/C4-2.html"></div>
+      
+      <!-- Chapter 5 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C5/page10.html"></div>
+      <div class="page"><img src="../../../PagesFH/Volume-1/C5/FH Ch5 Cover.png"></div>
+
+      <!-- Chapter 6 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page10.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C6/page11.html"></div>
+      <div class="page"><img src="../../../PagesFH/Volume-1/C6/FH V1 Ch6 Cover.png"></div>
+
+      <!-- Chapter 7 -->
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page1.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page2.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page3.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page4.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page5.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page6.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page7.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page8.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page9.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page10.html"></div>
+      <div class="page" data-src="../../../PagesFH/Volume-1/C7/page11.html"></div>
+      <div class="page"><img src="../../../PagesFH/Volume-1/C7/FH V1 Ch7 Cover.png"></div>
+    </div> <!-- /#flipbook -->
+  </div> <!-- /#flipbook-wrapper -->
 
   <!-- Collapsible Debug Log -->
   <div id="debug-log-wrapper" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; font-family: monospace; font-size: 12px;">
@@ -616,25 +764,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       location.reload();
     }
-  </script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-  fetch('../../../PagesFH/Volume-1/C1/all-pages.html')
-    .then(res => res.text())
-    .then(html => {
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = html;
-      const bookPages = tempDiv.querySelectorAll('.page-content');
-      const flipbookPages = document.querySelectorAll('#flipbook .page');
-      // Fill each flipbook page with the corresponding book-page content
-      flipbookPages.forEach((flipPage, i) => {
-        if (bookPages[i]) {
-          flipPage.innerHTML = bookPages[i].innerHTML;
-        }
-      });
-    });
-});
   </script>
 </body>
 </html>
