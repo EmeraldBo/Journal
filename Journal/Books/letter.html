@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoryless Letter</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ccc;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Stable wrapper */
+    #flipbook-wrapper {
+      width: 90vw;
+      height: 70vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Flipbook takes full wrapper size */
+    #flipbook {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Each page is half the book width */
+    #flipbook .page {
+      width: 45vw;
+      height: 70vh;
+      background: white;
+      box-sizing: border-box;
+      padding: 20px;
+      overflow: hidden;
+      font-family: serif;
+      font-size: clamp(14px, 2vw, 18px);
+      line-height: 1.4;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    #flipbook .page pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      word-break: break-word;
+    }
+    #flipbook .page img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 1rem;
+    }
+
+    #centerText {
+      position: fixed;
+      top: 10vh;
+      left: 50vw;
+      transform: translate(-50%, -50%);
+      font-size: clamp(12px, 4vw, 24px);
+      font-family: sans-serif;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 10000;
+    }
+
+
+    #userNameplate {
+      position: fixed;
+      top: 10vh;
+      left: 10vw;
+      transform: translate(-50%, -50%);
+      font-size: clamp(10px, 3vw, 20px);
+      font-family: sans-serif;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 2px;
+      z-index: 10000;
+    }
+
+    /* Optional style tweak for page‐number div */
+    .page-number {
+      font-weight: bold;
+      opacity: 0.6;
+    }
+    .comment-section {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      font-size: 12px;
+      z-index: 1000;
+      font-family: sans-serif;
+    }
+    .comments-container {
+      max-height: 80px;
+      overflow-y: auto;
+      margin-bottom: 5px;
+      padding: 5px;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+    .comment-input {
+      width: 100%;
+      height: 40px;
+      resize: none;
+    }
+    .submit-comment {
+      margin-top: 4px;
+      float: right;
+    }
+    .collapse-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    .extraBody {
+      position: fixed;
+      bottom: 55px;
+      left: 10px;
+      right: 10px;
+      width: 100%;
+      font-size: 12px;
+      background: #f0f0f0;
+      z-index: 1000;
+      font-family: sans-serif;
+    }
+    .collapse-btn-extras {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+  .toggle-buttons-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1000;
+    flex-direction: row; /* Default: side by side */
+  }
+
+  @media (max-width: 767px) {
+    .toggle-buttons-row {
+      flex-direction: column; /* Stack vertically on mobile */
+      left: 10px;
+      right: 10px;
+      width: auto;
+      align-items: flex-start;
+    }
+  }
+  </style>
+  <script> 
+  const username = localStorage.getItem('journalUsername');
+  const isPC = window.innerWidth >= 768;
+  </script>
+  <!-- 1) jQuery 1.9.1 (must load first) -->
+  <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <!-- 2) Turn.js 3 (must load second) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+  
+
+
+    <!-- Admin Notify Button (hidden by default) -->
+<button id="notify-update-btn" style="display:block;position:fixed;bottom:20px;right:20px;z-index:9999;">🔔 Notify Users of Update</button>
+
+<script>
+// filepath: c:\Users\sacha\Desktop\Journal\Books\journal-testing.html
+if (!username) {
+  window.location.href = "../index.html";
+}
+if (username == 'public') {
+  window.location.href = "../Books/Fractured-Horizons/V1/frachorizons.html";
+}
+</script>
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "19ba157f-7fa3-4b2f-a73f-29b593ca82c1",
+    });
+  });
+</script>
+
+<script>
+  // Hide the button by default
+  document.getElementById('notify-update-btn').style.display = 'none';
+
+  // Show only for debug users
+  if (username === 'debug') {
+    document.getElementById('notify-update-btn').style.display = 'block';
+  }
+
+  document.getElementById('notify-update-btn').onclick = async function() {
+    const confirmed = confirm("Send a notification to all users about the journal update?");
+    if (!confirmed) return;
+    try {
+      const resp = await fetch('/.netlify/functions/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Journal Updated!',
+          message: 'The journal has just been updated. Check out the new content!'
+        })
+      });
+      if (resp.ok) {
+        alert('Notification sent!');
+      } else {
+        alert('Failed to send notification.');
+      }
+    } catch (e) {
+      alert('Error sending notification.');
+    }
+  };
+</script>
+  
+  <script>
+      $(document).ready(function () {
+      // Center‐screen hint
+      const userNameplate = document.createElement('div');
+      userNameplate.id = 'userNameplate';
+userNameplate.innerHTML = 'Logged in as:<br>' + (localStorage.getItem('journalUsername') || 'Guest');
+      document.body.appendChild(userNameplate);
+
+      // Add Sign Out button
+const signOutBtn = document.createElement('button');
+signOutBtn.textContent = 'Sign Out';
+signOutBtn.style.marginTop = '8px';
+signOutBtn.onclick = function() {
+  localStorage.removeItem('journalUsername');
+  window.location.href = '../index.html';
+};
+userNameplate.appendChild(document.createElement('br'));
+userNameplate.appendChild(signOutBtn);
+
+document.body.appendChild(userNameplate);
+      });
+
+      
+  </script>
+  <script>
+    $(document).ready(function () {
+      // Center‐screen hint
+      const isPC = window.innerWidth >= 768;
+      const centerText = document.createElement('div');
+      centerText.id = 'centerText';
+      centerText.textContent = 'Use Arrow Keys (PC) or Swipe/Tap (Mobile) to navigate.';
+      document.body.appendChild(centerText);
+
+      // Arrow navigation
+      $(document).keydown(function(e) {
+        switch (e.key) {
+          case 'ArrowLeft':
+            $('#flipbook').turn('previous');
+            break;
+          case 'ArrowRight':
+            $('#flipbook').turn('next');
+            break;
+        }
+      });
+
+      // Initialize flipbook
+      const pages = $('#flipbook .page');
+      const pageCount = pages.length;
+      if (pageCount < 2) {
+        console.warn('⚠️ At least 2 pages are needed for flipping to work.');
+      }
+      $('#flipbook').turn({
+        width:      isPC ? 400  : window.innerWidth * 0.9,
+        height:     isPC ? 600  : window.innerHeight * 0.8,
+        autoCenter: true,
+        display:    'single',
+        elevation:  50,
+        gradients:  true,
+        when: {
+          turned: function (event, page) {
+            loadComments(page);
+          }
+        }
+      });
+
+      // Preload first pages and add page numbers
+      pages.each(function(index) {
+        const p = index + 1;
+        const pageDiv = $(this);
+        const src = pageDiv.data('src');
+
+        if (src) {
+          pageDiv.load(src, function (response, status) {
+            if (status === 'error') {
+              pageDiv.html('<pre style="color:red;">⚠️ Failed to load</pre>');
+            } else {
+              pageDiv.data('loaded', true);
+            }
+            // Add page number
+            pageDiv.find('.page-number').remove();
+            const numberEl = document.createElement('div');
+            numberEl.textContent = p;
+            numberEl.className = 'page-number';
+            Object.assign(numberEl.style, {
+              position:     'absolute',
+              bottom:       '20px',
+              right:        '20px',
+              fontSize:     '12px',
+              color:        'gray',
+              fontFamily:   'sans-serif',
+              pointerEvents:'none'
+            });
+            pageDiv.append(numberEl);
+          });
+        } else {
+          // Static page: just add page number and comment container
+          pageDiv.find('.page-number').remove();
+          const numberEl = document.createElement('div');
+          numberEl.textContent = p;
+          numberEl.className = 'page-number';
+          Object.assign(numberEl.style, {
+            position:     'absolute',
+            bottom:       '5px',
+            right:        '10px',
+            fontSize:     '12px',
+            color:        '#fff',
+            fontFamily:   'sans-serif',
+            pointerEvents:'none'
+          });
+          pageDiv.append(numberEl);
+          loadComments(p);
+        }
+      });
+
+      // Attach comment button handler
+      document.querySelector('.submit-comment').addEventListener('click', addComment);
+
+      // Load comments for initial page
+      const initialPage = $('#flipbook').turn('page') || 1;
+      loadComments(initialPage);
+
+      // Touch swipe for mobile/desktop hybrid
+      $('#flipbook').on('touchstart', function (event) {
+        const xStart = event.originalEvent.touches[0].clientX;
+        $(this).one('touchend', function (event) {
+          const xEnd    = event.originalEvent.changedTouches[0].clientX;
+          const distance= xStart - xEnd;
+          if (Math.abs(distance) > 50) {
+            if (distance > 0)   $(this).turn('next');
+            else                $(this).turn('previous');
+          }
+        });
+      });
+
+      // Debug log override
+      const originalConsoleLog  = console.log;
+      const originalConsoleWarn = console.warn;
+      const originalConsoleError= console.error;
+      function appendToDebugLog(type, ...args) {
+        const debugLog = document.getElementById('debug-log');
+        if (debugLog) {
+          const timestamp = new Date().toLocaleTimeString();
+          const color = (type === 'log' ? 'lime' : type === 'warn' ? 'orange' : 'red');
+          const prefix = type.toUpperCase();
+          const msg = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg))).join(' ');
+          debugLog.innerHTML += `<div style="color:${color};">[${timestamp}] ${prefix}: ${msg}</div>`;
+        }
+      }
+      console.log = function (...args) {
+        originalConsoleLog.apply(console, args);
+        appendToDebugLog('log', ...args);
+      };
+      console.warn = function (...args) {
+        originalConsoleWarn.apply(console, args);
+        appendToDebugLog('warn', ...args);
+      };
+      console.error = function (...args) {
+        originalConsoleError.apply(console, args);
+        appendToDebugLog('error', ...args);
+      };
+      function toggleDebugLog() {
+        const logEl = document.getElementById('debug-log');
+        logEl.style.display = (logEl.style.display === 'none') ? 'block' : 'none';
+      }
+      $('#toggle-debug').on('click', toggleDebugLog);
+    });
+  </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (username === 'debug') {
+    document.getElementById('debug-log-wrapper').style.display = 'block';
+  } else {
+    document.getElementById('debug-log-wrapper').style.display = 'none';
+  }
+});
+</script>
+
+<script>
+  // 1. Define the book identifier at the top
+  const book = 'letter'; // Change this to 'letter' or other for other books
+
+  function escapeHTML(str) {
+    return str.replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[m]));
+  }
+
+  // Display comments in the comments-container
+  function displayComments(comments) {
+    const container = document.querySelector('.comments-container');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!comments || comments.length === 0) {
+      container.innerHTML = '<div style="color:gray;">No comments yet.</div>';
+      return;
+    }
+    comments.forEach(comment => {
+      const div = document.createElement('div');
+      div.innerHTML = `<b>${escapeHTML(comment.user)}:</b> ${escapeHTML(comment.text)}`;
+      container.appendChild(div);
+    });
+  }
+
+  // 2. Load comments for a page from backend (include book)
+  async function loadComments(page = 1) {
+    try {
+      const response = await fetch(`/.netlify/functions/comments?book=${book}&page=${page}`, {
+        method: 'GET',
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      console.log("Loaded comments:", data.comments);
+      displayComments(data.comments);
+    } catch (error) {
+      console.error('Failed to load comments:', error);
+      displayComments([]);
+    }
+  }
+
+  // 3. Add a comment via backend (include book)
+  async function addComment() {
+    const commentText = document.querySelector('.comment-input').value.trim();
+    if (!commentText) return;
+    const page = $('#flipbook').turn('page') || 1;
+    const user = localStorage.getItem('journalUsername') || 'User';
+    try {
+      const response = await fetch('/.netlify/functions/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        body: JSON.stringify({ user: user, text: escapeHTML(commentText), page, book }) // <-- include book
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      console.log('Posted comment:', data.message);
+      document.querySelector('.comment-input').value = '';
+      loadComments(page);
+
+      // Send notification after successful comment post
+      const notifResponse = await fetch('/.netlify/functions/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New Comment!',
+          message: 'Someone posted a new comment.'
+        })
+      });
+      const notifData = await notifResponse.json();
+      console.log('Notification sent:', notifData);
+
+    } catch (error) {
+      console.error('Failed to post comment or send notification:', error);
+    }
+  }
+
+  // 4. Reset comments via backend (include book)
+  async function askPasswordAndClear() {
+    const password = prompt("Enter password to reset comments:");
+    if (password === 'Admin123') {
+      try {
+        const page = $('#flipbook').turn('page') || 1;
+        const response = await fetch('/.netlify/functions/comments/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password, page, book }) // <-- include book
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        alert('Comments reset.');
+        loadComments(page);
+      } catch (error) {
+        alert('Failed to reset comments.');
+      }
+    } else {
+      alert("Incorrect password.");
+    }
+  }
+</script>
+  <script>
+  // Toggle comments visibility
+  function toggleComments() {
+    const body = document.getElementById('commentBody');
+    const btn = document.querySelector('.collapse-btn');
+    const isVisible = body.style.display === 'block';
+    body.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? '💬 Show Comments' : '💬 Hide Comments';
+  }
+  // Toggle extras visibility
+  function toggleExtras() {
+    const body = document.getElementById('extraBody');
+    const btn = document.querySelector('.collapse-btn-extras');
+    const isVisible = body.style.display === 'block';
+    body.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? '📚 Extras' : '📚 Hide Extras';
+  }
+</script>
+</head>
+
+<body>
+
+<!-- Extras Menu -->
+<div id="extra-books" style="position: fixed; bottom: 55px; left: 10px; z-index: 1000;">
+  <div id="extraBody" class="extras-body" style="display: none;">
+    <h4>Extras</h4>
+    <ul>
+      Journals:
+      <li><a href="../Books/journal.html">Timeless Journal</a></li>
+      Special Messages:
+      <li><a href="../Books/letter.html">Memoryless Letter</a></li>
+
+      Public Books:
+      <li><a href="../../../Books/Fractured-Horizons/V1/frachorizons.html">The Fractured Horizons</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- Comments -->
+<div class="comment-section" style="position: fixed; bottom: 65px; left: 10px; z-index: 1000;">
+  <div id="commentBody" class="comments-body" style="display: none;">
+    <h4>Comments</h4>
+    <div class="comments-container"></div>
+    <textarea class="comment-input" placeholder="Write a comment..."></textarea>
+    <button onclick="askPasswordAndClear()">Reset Comments</button>
+    <button class="submit-comment">Post Comment</button>
+  </div>
+</div>
+
+<!-- Toggle Buttons -->
+<div class="toggle-buttons-row">
+  <button class="collapse-btn" onclick="toggleComments()">💬 Toggle Comments</button>
+  <button class="collapse-btn-extras" onclick="toggleExtras()">📚 Toggle Extras</button>
+</div>
+
+  <div id="flipbook-wrapper">
+    <div id="flipbook">
+      <!-- Page 1 (static) -->
+      <div class="page">
+        <pre>
+Memoryless Letter
+        
+by ???
+        </pre>
+        <img src="../doodles/special-msg-doodle.png" alt="Timeless Journal title doodle">
+      </div>
+      
+      <!-- Opening Pages (static) -->
+      <div class="page" data-src="../Pages/Opening.html"></div>
+
+      <div class="page" data-src="../Pages/Other/blank.html"></div>
+      <div class="page" data-src="../Pages/Other/lettertitle.html"></div>
+      <!-- Letter (SpecialMessage) -->
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page1.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page2.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page3.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page4.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page5.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page6.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page7.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page8.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page9.html"></div>
+      <div class="page" data-src="../Pages/SpecialMessage/Letter/page10.html"></div>
+    </div> <!-- /#flipbook -->
+  </div> <!-- /#flipbook-wrapper -->
+
+  <!-- Collapsible Debug Log -->
+  <div id="debug-log-wrapper" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; font-family: monospace; font-size: 12px;">
+    <div id="toggle-debug" style="background: #222; color: #0f0; padding: 5px 10px; cursor: pointer;">
+      ⚙️ Debug Log (click to toggle)
+    </div>
+    <div id="debug-log" style="background: black; color: lime; max-height: 150px; overflow-y: auto; padding: 10px; display: none; border-bottom: 2px solid lime;"></div>
+  </div>
+
+  <script>
+
+    function clearComments() {
+      for (let key in localStorage) {
+        if (key.startsWith("comments_page_")) {
+          localStorage.removeItem(key);
+        }
+      }
+      location.reload();
+    }
+  </script>
+</body>
+</html>
